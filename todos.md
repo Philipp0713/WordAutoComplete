@@ -9,3 +9,8 @@
 - Infrastruktur verbessern: Code in Methoden auslagern, ...
 - Dokumentation
 
+
+## Funktionalität
+- Programm soll lernen. Wenn bestimmte Wörter eingegeben werden, sollen sie als häufiger gekennzeichnet werden und weiter oben vorgeschlagen werden
+- mit STRG richtig umgehen. STRG del, STRG nicht schreiben
+
