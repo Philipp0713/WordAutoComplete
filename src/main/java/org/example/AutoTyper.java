@@ -9,17 +9,21 @@ import java.awt.event.KeyEvent;
 
 public class AutoTyper {
 
+    /**
+     * Number of currently active writers. A writer is active only when is writing some text and a few milliseconds
+     * after that.
+     */
     public static int writingCount = 0;
 
     private AutoTyper() {}
 
     /**
      * Writes the String text as if it was written by the users keyboard. It does that by copy-pasting the result at
-     * the respective location
+     * the respective location.
      * @param text text to be written
      * @throws AWTException if something goes wrong with writing or copy-pasting
      */
-    public static void writeWithClipboard(String text) throws AWTException {
+    public static void writeUsingClipboard(String text) throws AWTException {
         Robot robot = new Robot();
 
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -79,6 +83,6 @@ public class AutoTyper {
         } catch (InterruptedException ignored) {}
         writingCount--;
 
-        AutoTyper.writeWithClipboard(replacement);
+        AutoTyper.writeUsingClipboard(replacement);
     }
 }

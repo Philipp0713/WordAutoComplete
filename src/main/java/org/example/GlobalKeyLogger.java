@@ -11,18 +11,37 @@ import java.util.stream.Collectors;
 
 public class GlobalKeyLogger implements NativeKeyListener {
 
-    private ArrayList<String> text;
-    private boolean isUpperCase;
+    /**
+     * Stores the text listened to by this class.
+     */
+    private StringBuilder text;
+
+    /**
+     * Stores the current position of the cursor. Since this class can only listen to the left/right arrow keys, it is
+     * only able to stay consistent regarding these movements. TODO
+     */
+    private int currentCurserPosition;
+
+    /**
+     * Object used to generate the predicted words.
+     */
     private FrequencyTree tree;
-    private int numberOfWordsToPredict;
+
+    /**
+     * Stores the number of words that should be predicted and shown to the user at every timeframe.
+     */
+    private int numberOfPredictedWords;
+
+    /**
+     * Stores the predicted words after the last time they were updated using the updatePredictedWords() method.
+     */
     private String[] predictedWords;
 
-    public GlobalKeyLogger(FrequencyTree tree, int numberOfWordsToPredict) {
-        text = new ArrayList<>();
-        isUpperCase = false;
+    public GlobalKeyLogger(FrequencyTree tree, int numberOfPredictedWords) {
+        text = new StringBuilder();
         this.tree = tree;
-        this.numberOfWordsToPredict = numberOfWordsToPredict;
-        predictedWords = new String[numberOfWordsToPredict];
+        this.numberOfPredictedWords = numberOfPredictedWords;
+        predictedWords = new String[numberOfPredictedWords];
     }
 
 
@@ -37,14 +56,7 @@ public class GlobalKeyLogger implements NativeKeyListener {
             return;
         }
 
-        if(e.getKeyCode() == NativeKeyEvent.VC_CAPS_LOCK
-                || e.getKeyCode() == NativeKeyEvent.VC_SHIFT
-                || e.getKeyCode() == 3638) { // 3638 = the shift key on the right
-            isUpperCase = !isUpperCase;
-            return;
-        }
-
-        for (int i = 2; i <= numberOfWordsToPredict+1; i++) {
+        for (int i = 2; i <= numberOfPredictedWords+1; i++) {
 
             if(e.getKeyCode() == i && i-2 < predictedWords.length) {
                 //that means the user pressed the number key labeled i-1
@@ -53,54 +65,43 @@ public class GlobalKeyLogger implements NativeKeyListener {
                 new Thread(() -> {
                     try {
                         this.writePredictedWord(finalI-2);
-                    } catch (AWTException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                    displayWordsToPredict();
+                    } catch (AWTException ignored) {}
+                    updatePredictedWords();
+                    displayPredictedWords();
                 }).start();
                 return;
             }
         }
 
-
         switch (e.getKeyCode()) {
-            case NativeKeyEvent.VC_SPACE, NativeKeyEvent.VC_ENTER:
-                text.add(" ");
-                break;
             case NativeKeyEvent.VC_BACKSPACE:
-                if(!text.isEmpty()) text.removeLast();
+                if (!text.isEmpty()) text.deleteCharAt(text.length()-1);
+                updatePredictedWords();
+                displayPredictedWords();
                 break;
             case NativeKeyEvent.VC_UP, NativeKeyEvent.VC_DOWN, NativeKeyEvent.VC_LEFT, NativeKeyEvent.VC_RIGHT:
-                //we reset the text and current word
-                text = new ArrayList<>();
-                break;
-            case 39: //ü
-                text.add(isUpperCase ? "Ü" : "ü");
-                break;
-            case 40: //ä
-                text.add(isUpperCase ? "Ä" : "ä");
-                break;
-            case 41: //ö
-                text.add(isUpperCase ? "Ö" : "ö");
-                break;
-            default:
-                String stringToAppend = isUpperCase
-                        ? NativeKeyEvent.getKeyText(e.getKeyCode()).toUpperCase()
-                        : NativeKeyEvent.getKeyText(e.getKeyCode()).toLowerCase();
-                text.add(stringToAppend);
+                // we reset the text
+                text = new StringBuilder();
                 break;
         }
-
-
-        displayWordsToPredict();
     }
 
+    /**
+     * Method, that updates the array of predicted words to now predict the words of the current (possibly new) last
+     * word
+     */
+    public void updatePredictedWords() {
+        this.predictedWords = tree.getAutoCompletedWords(getLastWord(), numberOfPredictedWords);
+    }
 
-    public void displayWordsToPredict() {
+    /**
+     * Displays the current array of predicted words. They are not updated.
+     */
+    public void displayPredictedWords() {
         for (int i = 0; i < 20; i++) {
             System.out.println();
         }
-        this.predictedWords = tree.getAutoCompletedWords(getLastWord(), numberOfWordsToPredict);
+
         for (int i = 0; i < predictedWords.length; i++) {
             System.out.println((i+1) + ": " + predictedWords[i]);
         }
@@ -108,24 +109,28 @@ public class GlobalKeyLogger implements NativeKeyListener {
     }
 
     @Override
-    public void nativeKeyReleased(NativeKeyEvent e) {
+    public void nativeKeyReleased(NativeKeyEvent e) {}
+
+    @Override
+    public void nativeKeyTyped(NativeKeyEvent e) {
 
         // only actions from the user should trigger one of the following events
         if(AutoTyper.writingCount > 0) {
             return;
         }
 
-        switch(e.getKeyCode()) {
-            case NativeKeyEvent.VC_SHIFT, 3638:
-                isUpperCase = !isUpperCase;
-                break;
+        char c = e.getKeyChar();
+
+        if (c == NativeKeyEvent.CHAR_UNDEFINED || Character.isISOControl(c)) {
+            return;
         }
+
+        text.append(c);
+
+        updatePredictedWords();
+        displayPredictedWords();
     }
 
-    @Override
-    public void nativeKeyTyped(NativeKeyEvent e) {
-
-    }
 
     /**
      * Method, that returns the current text that is the result of concatenating all the one character strings
@@ -133,10 +138,7 @@ public class GlobalKeyLogger implements NativeKeyListener {
      * @return the current text
      */
     public String getText() {
-        return text.stream()
-                //if length of string is not equal to 1, it is not supported
-                .map(s -> s.length() == 1 ? s : "_")
-                .collect(Collectors.joining());
+        return text.toString();
     }
 
     /**
@@ -144,39 +146,41 @@ public class GlobalKeyLogger implements NativeKeyListener {
      * @return last word
      */
     public String getLastWord() {
-        String text = this.getText();
+        String textAsString = this.getText();
 
-        if (text.isEmpty()) {
+        if (textAsString.isEmpty()) {
             return "";
         }
 
-        if (text.charAt(text.length() - 1) == ' ') {
+        if (textAsString.charAt(textAsString.length() - 1) == ' ') {
             return "";
         }
 
-        List<String> list = Arrays.stream(text.split(" ")).toList();
+        List<String> list = Arrays.stream(textAsString.split(" ")).toList();
         if (list.getLast() == null || list.getLast().trim().isEmpty()) {
             return "";
         }
         return list.getLast();
     }
 
+    /**
+     * Method that replaces the last word and the character that chose the predicted word with the predicted word at
+     * index indexInPredictedWords
+     * @param indexInPredictedWords index of the predicted word
+     * @throws AWTException if something goes wrong with writing or copy-pasting
+     */
     private void writePredictedWord(int indexInPredictedWords) throws AWTException {
+        // first delete the number and update the predicted words
+        text.deleteCharAt(text.length()-1);
+        updatePredictedWords();
+
         String textToAppend = predictedWords[indexInPredictedWords];
 
         AutoTyper.replace(getLastWord(), textToAppend);
 
         for (int j = getLastWord().length(); j < textToAppend.length(); j++) {
-            text.add("" + textToAppend.charAt(j));
+            text.append(textToAppend.charAt(j));
         }
-    }
-
-    /**
-     * Appends the given character ch to the end of the text
-      * @param ch the character to append
-     */
-    public void addToText(char ch) {
-        text.add("" + ch);
     }
 
     /**

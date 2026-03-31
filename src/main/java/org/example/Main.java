@@ -29,4 +29,4 @@ public class Main {
         GlobalKeyLogger logger = new GlobalKeyLogger(tree, NUMBER_OF_WORDS_TO_PREDICT);
         GlobalScreen.addNativeKeyListener(logger);
     }
-}//äua4$
+}//
