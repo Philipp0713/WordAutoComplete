@@ -37,7 +37,6 @@ public class GlobalKeyLogger implements NativeKeyListener {
             return;
         }
 
-
         if(e.getKeyCode() == NativeKeyEvent.VC_CAPS_LOCK
                 || e.getKeyCode() == NativeKeyEvent.VC_SHIFT
                 || e.getKeyCode() == 3638) { // 3638 = the shift key on the right
@@ -111,6 +110,11 @@ public class GlobalKeyLogger implements NativeKeyListener {
     @Override
     public void nativeKeyReleased(NativeKeyEvent e) {
 
+        // only actions from the user should trigger one of the following events
+        if(AutoTyper.writingCount > 0) {
+            return;
+        }
+
         switch(e.getKeyCode()) {
             case NativeKeyEvent.VC_SHIFT, 3638:
                 isUpperCase = !isUpperCase;
@@ -119,9 +123,15 @@ public class GlobalKeyLogger implements NativeKeyListener {
     }
 
     @Override
-    public void nativeKeyTyped(NativeKeyEvent e) {}
+    public void nativeKeyTyped(NativeKeyEvent e) {
 
+    }
 
+    /**
+     * Method, that returns the current text that is the result of concatenating all the one character strings
+     * from the ArrayList text. So this is a simpler form of the string that the user typed.
+     * @return the current text
+     */
     public String getText() {
         return text.stream()
                 //if length of string is not equal to 1, it is not supported
