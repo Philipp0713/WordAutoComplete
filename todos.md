@@ -11,6 +11,8 @@
 
 
 ## Funktionalität
+- wörter sollten nicht doppelt vorkommen können => dafür am besten alles in ein TreeSet umplatzieren und jedem Wort eine wichtigkeit geben
+- .,!" am Ende von Wörtern sollte nicht hinzugefügt werden
 - Generell mit Pfeiltasten rechts/links bewegen können
 - Mit STRG + Pfeiltasten, STRG + entf rumspringen / sachen löschen können
 - Programm soll lernen. Wenn bestimmte Wörter eingegeben werden, sollen sie als häufiger gekennzeichnet werden und weiter oben vorgeschlagen werden

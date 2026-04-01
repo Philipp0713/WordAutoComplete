@@ -5,9 +5,6 @@ import java.awt.*;
 import java.io.FileNotFoundException;
 
 public class Main {
-    public static final int NUMBER_OF_WORDS_TO_PREDICT = 9;
-    public static final boolean ONLY_PREFIXES = true;
-
 
     public static void main(String[] args) {
 
@@ -26,7 +23,7 @@ public class Main {
             return;
         }
 
-        GlobalKeyLogger logger = new GlobalKeyLogger(tree, NUMBER_OF_WORDS_TO_PREDICT);
+        GlobalKeyLogger logger = new GlobalKeyLogger(tree, 9);
         GlobalScreen.addNativeKeyListener(logger);
     }
-}//
+}//somit ist das grundsätzliche Konzept abgeschlossen. Jetzt scheint es auch besser zu funktionieren.

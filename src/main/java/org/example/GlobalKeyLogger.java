@@ -83,6 +83,9 @@ public class GlobalKeyLogger implements NativeKeyListener {
                 // we reset the text
                 text = new StringBuilder();
                 break;
+            case NativeKeyEvent.VC_SPACE:
+                tree.addWordToUserWords(getLastWord());
+                break;
         }
     }
 
@@ -91,7 +94,7 @@ public class GlobalKeyLogger implements NativeKeyListener {
      * word
      */
     public void updatePredictedWords() {
-        this.predictedWords = tree.getAutoCompletedWords(getLastWord(), numberOfPredictedWords);
+        this.predictedWords = tree.getAutoCompletedWords(getLastWord(), numberOfPredictedWords, 2);
     }
 
     /**
