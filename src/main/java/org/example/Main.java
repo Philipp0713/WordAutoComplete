@@ -26,4 +26,4 @@ public class Main {
         GlobalKeyLogger logger = new GlobalKeyLogger(tree, 9);
         GlobalScreen.addNativeKeyListener(logger);
     }
-}//somit ist das grundsätzliche Konzept abgeschlossen. Jetzt scheint es auch besser zu funktionieren.
+}//

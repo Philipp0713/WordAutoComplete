@@ -1,38 +1,34 @@
 package org.example;
 
-import com.abahgat.suffixtree.GeneralizedSuffixTree;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiPredicate;
+import java.util.stream.Collectors;
 
 public class FrequencyTree {
-    private final GeneralizedSuffixTree tree;
     /**
-     * An Array of a large number of common german words.
-     * If i < j, then words[i] is at least as frequent as words[j].
+     * A Collection of all words. Ordered in terms of the usage frequency.
      */
-    private String[] words;
-    private final int numberOfWordsWithoutUser;
+    private final TreeSet<WordWithUsage> words;
     /**
-     * A Collection of words that were already used by the user. Ordered in terms of the usage frequency.
+     * A Map of words that were already used by the user with the respective usage of each word.
      */
     private HashMap<String, Integer> userWords;
 
     public FrequencyTree() throws FileNotFoundException {
         BufferedReader reader = new BufferedReader(new FileReader("top10000de.txt"));
 
+        AtomicInteger usage = new AtomicInteger(0);
+
         words = reader.lines()
                 .filter(string -> !string.isBlank())
-                .toArray(String[]::new);
-        numberOfWordsWithoutUser = words.length;
+                .map(string -> new WordWithUsage(string, usage.getAndDecrement()))
+                .collect(Collectors.toCollection(TreeSet::new));
 
-        tree = new GeneralizedSuffixTree();
-
-        for (int i = 0; i < words.length; i++) {
-            tree.put(words[i], i);
-        }
         ObjectMapper mapper = new ObjectMapper();
 
         try {
@@ -42,47 +38,36 @@ public class FrequencyTree {
             userWords = new HashMap<>();
         }
 
-        updateWordArray();
+        updateWords();
     }
 
-    public void updateWordArray() {
-        TreeSet<Map.Entry<String, Integer>> userWordSet = new TreeSet<>(
-                (a, b) -> {
-                    int cmp = b.getValue().compareTo(a.getValue()); // absteigend nach Wert
-                    if (cmp == 0) {
-                        return a.getKey().compareTo(b.getKey()); // Tie-Breaker nach String
+    public void updateWords() {
+
+        for (Map.Entry<String, Integer> entry : userWords.entrySet()) {
+            WordWithUsage newElement = new WordWithUsage(entry.getKey(), entry.getValue());
+
+            boolean isNewWord = true;
+
+            for (WordWithUsage foundElement : words) {
+                if (foundElement.equals(newElement)) {
+                    if (foundElement.getUsage() <= 0) {
+                        // it is a word not created by the user
+                        words.remove(foundElement);
+                        words.add(newElement);
+                    } else {
+                        // it is a word already created by the user
+                        words.remove(foundElement);
+                        newElement.setUsage(newElement.getUsage());
+                        words.add(newElement);
                     }
-                    return cmp;
-                });
-
-        userWordSet.addAll(userWords.entrySet());
-
-        String[] newWordArray = new String[userWordSet.size() + numberOfWordsWithoutUser];
-
-        int i = 0;
-
-        for (Map.Entry<String, Integer> entry : userWordSet) {
-            newWordArray[i] = entry.getKey();
-            i++;
-        }
-
-        for (i = userWordSet.size(); i < newWordArray.length; i++) {
-            newWordArray[i] = words[i - userWordSet.size()];
-        }
-        words = newWordArray;
-    }
-
-    public static void main(String[] args) {
-        FrequencyTree tree;
-        try {
-            tree = new FrequencyTree();
-        } catch (FileNotFoundException e) {
-            return;
-        }
-        String[] words = tree.getAutoCompletedWords("dam", 9, 0);
-
-        for (String word : words) {
-            System.out.println(word);
+                    isNewWord = false;
+                    break;
+                }
+            }
+            if (isNewWord) {
+                // it is a new Word
+                words.add(newElement);
+            }
         }
     }
 
@@ -91,11 +76,28 @@ public class FrequencyTree {
      * @param word the word that is added.
      */
     public void addWordToUserWords(String word) {
-        if(word.isBlank()) {
+        if (word.isBlank()) {
             return;
         }
 
-        userWords.put(word, userWords.getOrDefault(word, 0) + 1);
+        StringBuilder trimmedWord = new StringBuilder();
+
+        for (int i = 0; i < word.length(); i++) {
+            char c = word.charAt(i);
+
+            if (Character.isAlphabetic(c)
+                    || Character.isDigit(c)
+                    || c == '\''
+                    || c == '-') {
+                trimmedWord.append(c);
+            } else if(c == '/' || c == '+') {
+                userWords.put(trimmedWord.toString(), userWords.getOrDefault(trimmedWord.toString(), 0) + 1);
+                trimmedWord = new StringBuilder();
+            }
+        }
+        userWords.put(trimmedWord.toString(), userWords.getOrDefault(trimmedWord.toString(), 0) + 1);
+
+        updateWords();
 
         try {
             saveUserWords();
@@ -125,9 +127,9 @@ public class FrequencyTree {
      */
     public String[] getAutoCompletedWords(String lastWord, int numberOfWords, int method) {
         return switch (method) {
-            case 0 -> getAutoCompletedWordsUsingConnectedString(lastWord, numberOfWords, true);
-            case 1 -> getAutoCompletedWordsUsingConnectedString(lastWord, numberOfWords, false);
-            case 2 -> getAutoCompletedWordsUsingUnconnectedString(lastWord, numberOfWords);
+            case 0 -> getAutoCompletedWordsUsingPredicate(lastWord, numberOfWords, FrequencyTree::isPrefix);
+            case 1 -> getAutoCompletedWordsUsingPredicate(lastWord, numberOfWords, FrequencyTree::isInfix);
+            case 2 -> getAutoCompletedWordsUsingPredicate(lastWord, numberOfWords, FrequencyTree::isSubsequence);
             default -> null;
         };
     }
@@ -137,59 +139,18 @@ public class FrequencyTree {
      * lastWord has to be a prefix or infix of the suggestions.
      * @param lastWord string that should be autocompleted
      * @param numberOfWords number of words that are suggested as options
-     * @param onlyUsingPrefix If true, lastWord has to be a prefix. If false, lastWord has to be an infix.
+     * @param predicate the BiPredicate that decides if a String should be suggested. First argument is always lastword
+     *                  and the second argument is the String
      * @return the most frequent words that are the most likely to be autocompleted
      */
-    private String[] getAutoCompletedWordsUsingConnectedString(String lastWord, int numberOfWords,
-                                                               boolean onlyUsingPrefix) {
-        Collection<Integer> indices = tree.search(lastWord);
-
-        List<Integer> smallestIndices = getMostFrequentIndices(lastWord, numberOfWords, indices, onlyUsingPrefix);
-
-        Collections.sort(smallestIndices);
-
-        String[] result = new String[smallestIndices.size()];
-
-        for (int i = 0; i < smallestIndices.size(); i++) {
-            result[i] = words[smallestIndices.get(i)];
-        }
-
-        return result;
-    }
-
-    private List<Integer> getMostFrequentIndices(String lastWord, int numberOfWords, Collection<Integer> indices,
-                                                 boolean onlyUsingPrefix) {
-        PriorityQueue<Integer> heap = new PriorityQueue<>(numberOfWords, (a, b) -> b - a);
-        for (int index : indices) {
-            if(onlyUsingPrefix) {
-                if(!words[index].startsWith(lastWord)) {
-                    continue;
-                }
-            }
-
-            if (heap.size() < numberOfWords) {
-                heap.add(index);
-            } else if (index > heap.peek()) {
-                heap.poll();
-                heap.add(index);
-            }
-        }
-
-        return new ArrayList<>(heap);
-    }
-
-    /**
-     * Method, that returns the numberOfWords most frequent words that are the most likely to be autocompleted.
-     * lastWord has to be a subsequence of the suggestions.
-     * @param lastWord string that should be autocompleted
-     * @param numberOfWords number of words that are suggested as options
-     * @return the most frequent words that are the most likely to be autocompleted.
-     */
-    private String[] getAutoCompletedWordsUsingUnconnectedString(String lastWord, int numberOfWords) {
+    private String[] getAutoCompletedWordsUsingPredicate(String lastWord, int numberOfWords,
+                                                         BiPredicate<String, String> predicate) {
         ArrayList<String> foundWords = new ArrayList<>();
 
-        for (String word : words) {
-            if (isSubsequence(lastWord, word)) {
+        for (WordWithUsage entry : words) {
+            String word = entry.getWord();
+
+            if (predicate.test(lastWord, word)) {
                 foundWords.add(word);
             }
             if (foundWords.size() >= numberOfWords) {
@@ -222,5 +183,93 @@ public class FrequencyTree {
             }
         }
         return false;
+    }
+
+    /**
+     * Returns if the String prefix is a prefix of the String string.
+     * @param prefix potential prefix
+     * @param string string the prefix is compared to
+     * @return if prefix is a prefix of string
+     */
+    private static boolean isPrefix(String prefix, String string) {
+        if (string.length() < prefix.length()) {
+            return false;
+        }
+
+        for (int i = 0; i < prefix.length(); i++) {
+            if (prefix.charAt(i) != string.charAt(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Returns if the String infix is an infix of the String string.
+     * @param infix potential infix
+     * @param string string the infix is compared to
+     * @return if infix is an infix of string
+     */
+    private static boolean isInfix(String infix, String string) {
+
+        for (int i = 0; i < string.length(); i++) {
+            if (isPrefix(infix, string.substring(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static class WordWithUsage implements Comparable<WordWithUsage> {
+        private String word;
+        private int usage;
+
+        public WordWithUsage(String word, int usage) {
+            this.word = word;
+            this.usage = usage;
+        }
+
+        public String getWord() {
+            return word;
+        }
+
+        public void setWord(String word) {
+            this.word = word;
+        }
+
+        public int getUsage() {
+            return usage;
+        }
+
+        public void setUsage(int usage) {
+            this.usage = usage;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof WordWithUsage wordWithUsage)) {
+                return false;
+            }
+
+            if (this.getWord() == null) {
+                return wordWithUsage.getWord() == null;
+            }
+
+            return this.getWord().equals(wordWithUsage.getWord());
+        }
+
+        @Override
+        public int compareTo(WordWithUsage b) {
+            if (this.getWord().equals(b.getWord())) {
+                // no duplicate words in the Set
+                return 0;
+            }
+
+            int cmp = b.getUsage() - this.getUsage(); // descending by usage
+            if (cmp == 0) {
+                return this.getWord().compareTo(b.getWord()); // Tie-Breaker by word-order
+            }
+            return cmp;
+        }
     }
 }
