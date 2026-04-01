@@ -9,6 +9,7 @@
 
 
 ## Funktionalität
+- man darf nicht zu schnell leertaste danach drücken => vlt einen puffer einbauen?
 - Generell mit Pfeiltasten rechts/links bewegen können
 - Mit STRG + Pfeiltasten, STRG + entf rumspringen / sachen löschen können
 - Programm soll lernen. Wenn bestimmte Wörter eingegeben werden, sollen sie als häufiger gekennzeichnet werden und weiter oben vorgeschlagen werden

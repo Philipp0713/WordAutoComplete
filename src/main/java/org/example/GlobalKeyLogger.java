@@ -37,20 +37,25 @@ public class GlobalKeyLogger implements NativeKeyListener {
      */
     private String[] predictedWords;
 
-    /**
-     * Stores a reference to the View class, where the UI is implemented.
-     */
-    private final View view;
+    private List<Runnable> listeners;
 
-    public GlobalKeyLogger(FrequencyTree tree, View view, int numberOfPredictedWords) {
-        text = new StringBuilder();
+    public GlobalKeyLogger(FrequencyTree tree, int numberOfPredictedWords) {
+        this.text = new StringBuilder();
         this.tree = tree;
         this.numberOfPredictedWords = numberOfPredictedWords;
-        this.view = view;
-        predictedWords = new String[numberOfPredictedWords];
+        this.predictedWords = new String[numberOfPredictedWords];
+        this.listeners = new ArrayList<>();
     }
 
+    public void addListener(Runnable listener) {
+        listeners.add(listener);
+    }
 
+    public void notifyAllListeners() {
+        for (Runnable listener : listeners) {
+            listener.run();
+        }
+    }
 
     @Override
     public void nativeKeyPressed(NativeKeyEvent e) {
@@ -107,17 +112,7 @@ public class GlobalKeyLogger implements NativeKeyListener {
      * Displays the current array of predicted words. They are not updated.
      */
     public void displayPredictedWords() {
-//        for (int i = 0; i < 20; i++) {
-//            System.out.println();
-//        }
-//
-//        for (int i = 0; i < predictedWords.length; i++) {
-//            System.out.println((i+1) + ": " + predictedWords[i]);
-//        }
-//        System.out.println(getText());
-
-        view.updateTextFields(predictedWords);
-        view.updateText(getText());
+        notifyAllListeners();
     }
 
     @Override

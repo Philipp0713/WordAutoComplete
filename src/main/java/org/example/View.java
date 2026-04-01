@@ -3,6 +3,7 @@ package org.example;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class View {
 
@@ -62,7 +63,6 @@ public class View {
         text.setEditable(false);
         text.setBackground(Color.LIGHT_GRAY);
         text.setHorizontalAlignment(JTextField.RIGHT);
-        text.setCaretPosition(text.getText().length());
 
         panel.add(text, gbc);
 
@@ -86,5 +86,12 @@ public class View {
 
     public void updateText(String newText) {
         text.setText(newText);
+        text.setCaretPosition(newText.length());
+    }
+
+    public void addButtonListeners(ActionListener[] listeners) {
+        for (int i = 0; i < buttons.length; i++) {
+            buttons[i].addActionListener(listeners[i]);
+        }
     }
 }
