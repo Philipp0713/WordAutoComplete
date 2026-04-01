@@ -1,10 +1,7 @@
 package org.example;
 
 import java.awt.*;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.*;
 import java.awt.event.KeyEvent;
 
 public class AutoTyper {
@@ -33,13 +30,22 @@ public class AutoTyper {
 
         // Neuen Text setzen
         StringSelection selection = new StringSelection(text);
-        clipboard.setContents(selection, null);
+        clipboard.setContents(selection, new ClipboardOwner() {
+            @Override
+            public void lostOwnership(Clipboard clipboard, Transferable contents) {
+                // optional: Logging oder Reaktion
+            }
+        });
 
         while (true) {
             try {
                 String current = (String) clipboard.getData(DataFlavor.stringFlavor);
                 if (text.equals(current)) break;
             } catch (Exception ignored) {}
+
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException ignored) {}
         }
 
         writingCount++;
@@ -52,7 +58,7 @@ public class AutoTyper {
 
         // kleine Pause (wichtig!)
         try {
-            Thread.sleep(50);
+            Thread.sleep(100);
         } catch (InterruptedException ignored) {}
         writingCount--;
 

@@ -8,6 +8,10 @@ public class Main {
 
     public static void main(String[] args) {
 
+        int numberOfPredictedWords = 9;
+
+        View view = new View(numberOfPredictedWords);
+
         FrequencyTree tree;
         try {
             tree = new FrequencyTree();
@@ -23,7 +27,7 @@ public class Main {
             return;
         }
 
-        GlobalKeyLogger logger = new GlobalKeyLogger(tree, 9);
+        GlobalKeyLogger logger = new GlobalKeyLogger(tree, view, numberOfPredictedWords);
         GlobalScreen.addNativeKeyListener(logger);
     }
 }//

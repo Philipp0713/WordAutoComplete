@@ -37,10 +37,16 @@ public class GlobalKeyLogger implements NativeKeyListener {
      */
     private String[] predictedWords;
 
-    public GlobalKeyLogger(FrequencyTree tree, int numberOfPredictedWords) {
+    /**
+     * Stores a reference to the View class, where the UI is implemented.
+     */
+    private final View view;
+
+    public GlobalKeyLogger(FrequencyTree tree, View view, int numberOfPredictedWords) {
         text = new StringBuilder();
         this.tree = tree;
         this.numberOfPredictedWords = numberOfPredictedWords;
+        this.view = view;
         predictedWords = new String[numberOfPredictedWords];
     }
 
@@ -101,14 +107,17 @@ public class GlobalKeyLogger implements NativeKeyListener {
      * Displays the current array of predicted words. They are not updated.
      */
     public void displayPredictedWords() {
-        for (int i = 0; i < 20; i++) {
-            System.out.println();
-        }
+//        for (int i = 0; i < 20; i++) {
+//            System.out.println();
+//        }
+//
+//        for (int i = 0; i < predictedWords.length; i++) {
+//            System.out.println((i+1) + ": " + predictedWords[i]);
+//        }
+//        System.out.println(getText());
 
-        for (int i = 0; i < predictedWords.length; i++) {
-            System.out.println((i+1) + ": " + predictedWords[i]);
-        }
-        System.out.println(getText());
+        view.updateTextFields(predictedWords);
+        view.updateText(getText());
     }
 
     @Override
@@ -181,8 +190,14 @@ public class GlobalKeyLogger implements NativeKeyListener {
 
         AutoTyper.replace(getLastWord(), textToAppend);
 
-        for (int j = getLastWord().length(); j < textToAppend.length(); j++) {
-            text.append(textToAppend.charAt(j));
+        String lastWord = getLastWord();
+
+        for (int i = 0; i < lastWord.length(); i++) {
+            text.deleteCharAt(text.length()-1);
+        }
+
+        for (int i = 0; i < textToAppend.length(); i++) {
+            text.append(textToAppend.charAt(i));
         }
     }
 
