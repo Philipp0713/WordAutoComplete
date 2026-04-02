@@ -4,6 +4,7 @@ import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 import com.github.kwhat.jnativehook.keyboard.NativeKeyListener;
 
 import java.awt.*;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -47,10 +48,18 @@ public class GlobalKeyLogger implements NativeKeyListener {
         this.listeners = new ArrayList<>();
     }
 
+    /**
+     * Adds a listener to this class. The listener will be run everytime there is a data change relevant to the
+     * respective listener.
+     * @param listener the listener
+     */
     public void addListener(Runnable listener) {
         listeners.add(listener);
     }
 
+    /**
+     * Runs all the listeners.
+     */
     public void notifyAllListeners() {
         for (Runnable listener : listeners) {
             listener.run();
@@ -95,9 +104,18 @@ public class GlobalKeyLogger implements NativeKeyListener {
                 text = new StringBuilder();
                 break;
             case NativeKeyEvent.VC_SPACE:
-                tree.addWordToUserWords(getLastWord());
+                tree.addWordToWords(getLastWord());
                 break;
         }
+    }
+    /**
+     * Deletes the string word from the database of words used by the program and updates everything accordingly.
+     * @param word string that will be deleted
+     */
+    public void deleteWord(String word) {
+        tree.deleteWordFromWords(word);
+        updatePredictedWords();
+        displayPredictedWords();
     }
 
     /**

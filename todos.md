@@ -1,6 +1,5 @@
 ## GUI
-- rechts/links neben jedem Wort die Möglichkeit haben, es zu löschen. Es kann ja sein, dass man sich mal verschreibt.
-- text rechtsbündig
+- button nur anzeigen, wenn das wort tatsächlich user-generiert ist
 
 
 ## generelle TODOs

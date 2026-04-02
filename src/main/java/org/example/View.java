@@ -7,9 +7,21 @@ import java.awt.event.ActionListener;
 
 public class View {
 
+    /**
+     * Stores the number of rows in the table. I.e. the number of autocompleted words that will be shown.
+     */
     private final int numberOfRows;
+    /**
+     * Stores all the text fields where the autocompleted words will be displayed.
+     */
     private final JTextField[] textFields;
+    /**
+     * Stores all the buttons used to delete the respective word from the database.
+     */
     private final JButton[] buttons;
+    /**
+     * Stores the String of key inputs listened to by the program.
+     */
     private final JTextField text;
 
     public View(int numberOfRows) {
@@ -20,7 +32,7 @@ public class View {
 
         for (int i = 0; i < numberOfRows; i++) {
             textFields[i] = new JTextField("");
-            buttons[i] = new JButton("delete word " + (i+1));
+            buttons[i] = new JButton("delete");
         }
 
         text = new JTextField("");
@@ -28,10 +40,11 @@ public class View {
 
         JFrame frame = new JFrame("Word Autocomplete");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(400, 400);
+        frame.setSize(300, 400);
         frame.setAlwaysOnTop(true);
 
         JPanel panel = new JPanel(new GridBagLayout());
+        ((GridBagLayout) panel.getLayout()).columnWidths = new int[] {90, 50, 0};
         GridBagConstraints gbc = new GridBagConstraints();
 
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -44,10 +57,21 @@ public class View {
             // Button (column 0)
             gbc.gridx = 0;
             gbc.weightx = 0;
+            buttons[i].setPreferredSize(new Dimension(80, 20));
             panel.add(buttons[i], gbc);
 
-            // TextField (column 1)
+            // Information (column 1)
             gbc.gridx = 1;
+            gbc.weightx = 0;
+            JTextField informationField = new JTextField("word " + (i+1));
+            informationField.setOpaque(false);              // No background
+            informationField.setBorder(null);               // Remove border
+            informationField.setEditable(false);
+            informationField.setHorizontalAlignment(JTextField.CENTER);
+            panel.add(informationField, gbc);
+
+            // TextField (column 2)
+            gbc.gridx = 2;
             gbc.weightx = 1;
             textFields[i].setEditable(false);
             textFields[i].setBackground(Color.LIGHT_GRAY);
@@ -57,7 +81,7 @@ public class View {
         // Last row (spanning both columns)
         gbc.gridy = numberOfRows;
         gbc.gridx = 0;
-        gbc.gridwidth = 2; // span across both columns
+        gbc.gridwidth = 3; // span across all columns
         gbc.weightx = 1;
 
         text.setEditable(false);
@@ -92,6 +116,12 @@ public class View {
     public void addButtonListeners(ActionListener[] listeners) {
         for (int i = 0; i < buttons.length; i++) {
             buttons[i].addActionListener(listeners[i]);
+        }
+    }
+
+    public void updateButtonVisibility(boolean[] visibility) {
+        for (int i = 0; i < buttons.length; i++) {
+            buttons[i].setVisible(visibility[i]);
         }
     }
 }

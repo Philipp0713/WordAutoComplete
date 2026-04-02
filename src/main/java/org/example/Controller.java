@@ -2,6 +2,7 @@ package org.example;
 
 import com.github.kwhat.jnativehook.GlobalScreen;
 
+import java.awt.event.ActionListener;
 import java.io.FileNotFoundException;
 
 public class Controller {
@@ -37,6 +38,18 @@ public class Controller {
 
         logger.addListener(this::updateTextFields);
         logger.addListener(this::updateText);
+        logger.addListener(this::updateButtonVisibility);
+
+        ActionListener[] listeners = new ActionListener[numberOfPredictedWords];
+
+        for (int i = 0; i < listeners.length; i++) {
+            int finalI = i;
+            listeners[i] = (e) -> {
+                logger.deleteWord(logger.getPredictedWords()[finalI]);
+            };
+        }
+
+        view.addButtonListeners(listeners);
     }
 
     public void updateTextFields() {
@@ -47,8 +60,18 @@ public class Controller {
         view.updateText(logger.getText());
     }
 
+    public void updateButtonVisibility() {
+        boolean[] visibility = new boolean[numberOfPredictedWords];
+        String[] predictedWords = logger.getPredictedWords();
+
+        for (int i = 0; i < visibility.length; i++) {
+            visibility[i] = tree.isUserWord(predictedWords[i]);
+        }
+        view.updateButtonVisibility(visibility);
+    }
+
 
     public static void main(String[] args) {
         new Controller();
     }
-}//
+}//hhhh hhhh hzz hhzz h
