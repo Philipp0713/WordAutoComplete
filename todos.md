@@ -1,19 +1,21 @@
 ## GUI
-- button nur anzeigen, wenn das wort tatsächlich user-generiert ist
-
+- einen Strich bei der Kopie des geschriebenen Textes anzeigen => wenn die Wörter diesen Strich überschreiten, werden sie grün und erst dann in die Datenbank aufgenommen
+- die Kopie des Textes updated nur relativ langsam => verbessern => vlt durch appenden statt ersetzen => kann alten Textinhalt speichern und mit neuem vergleichen oderso
 
 ## generelle TODOs
-- Infrastruktur verbessern: Code in Methoden auslagern, ...
 - Dokumentation
 
 
 ## Funktionalität
+- Word Counter Editor
+- Settings button
+- Reset button
+- Pause button
+- Info button
+- statt mit 1 das erste vervollständigen mit leertaste
 - man darf nicht zu schnell leertaste danach drücken => vlt einen puffer einbauen?
 - Generell mit Pfeiltasten rechts/links bewegen können
+- Pfeiltasten oben unten funktionsfähig machen
 - Mit STRG + Pfeiltasten, STRG + entf rumspringen / sachen löschen können
-- Programm soll lernen. Wenn bestimmte Wörter eingegeben werden, sollen sie als häufiger gekennzeichnet werden und weiter oben vorgeschlagen werden
-- vlt kann er auch die Tastatureingaben simulieren. Also immer wenn etwas eingegeben wird, macht der Robot das genau gleiche, damit man exakt weiß, was die Eingabe für ein Zeichen generiert hat. Dann muss man das nicht so umständich mit flags, etc machen
 - möglichkeit, STRG, SHIFT, ... alle für das Programm einzugeben. "Drücke jetzt STRG" => Programm weiß, was STRG beim jetzigen Rechner ist
-- Pfeiltasten funktionsfähig machen
 
-- hatte + Bundeswirtschaftminister bug => 
