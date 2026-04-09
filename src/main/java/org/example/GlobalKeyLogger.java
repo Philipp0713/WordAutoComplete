@@ -38,9 +38,15 @@ public class GlobalKeyLogger implements NativeKeyListener {
      */
     private String[] predictedWords;
 
+    /**
+     * Stores if the program is paused.
+     */
+    private boolean paused;
+
     private List<Runnable> listeners;
 
     public GlobalKeyLogger(FrequencyTree tree, int numberOfPredictedWords) {
+        this.paused = false;
         this.text = new StringBuilder();
         this.tree = tree;
         this.numberOfPredictedWords = numberOfPredictedWords;
@@ -70,6 +76,12 @@ public class GlobalKeyLogger implements NativeKeyListener {
     public void nativeKeyPressed(NativeKeyEvent e) {
 //        System.out.println("Taste gedrückt: " + NativeKeyEvent.getKeyText(e.getKeyCode()));
 //        System.out.println("Taste gedrückt: " + e.getKeyCode());
+
+        // if paused, do nothing
+        if(paused) {
+            return;
+        }
+
 
         // only actions from the user should trigger one of the following events
         if(AutoTyper.writingCount > 0) {
@@ -119,7 +131,7 @@ public class GlobalKeyLogger implements NativeKeyListener {
     }
 
     /**
-     * Method, that updates the array of predicted words to now predict the words of the current (possibly new) last
+     * Method that updates the array of predicted words to now predict the words of the current (possibly new) last
      * word
      */
     public void updatePredictedWords() {
@@ -138,6 +150,11 @@ public class GlobalKeyLogger implements NativeKeyListener {
 
     @Override
     public void nativeKeyTyped(NativeKeyEvent e) {
+
+        // if paused, do nothing
+        if(paused) {
+            return;
+        }
 
         // only actions from the user should trigger one of the following events
         if(AutoTyper.writingCount > 0) {
@@ -158,7 +175,7 @@ public class GlobalKeyLogger implements NativeKeyListener {
 
 
     /**
-     * Method, that returns the current text that is the result of concatenating all the one character strings
+     * Method that returns the current text that is the result of concatenating all the one character strings
      * from the ArrayList text. So this is a simpler form of the string that the user typed.
      * @return the current text
      */
@@ -167,7 +184,14 @@ public class GlobalKeyLogger implements NativeKeyListener {
     }
 
     /**
-     * Method, that returns the last word in text. I.e., the string of characters after the last space.
+     * Resets the text to an empty string.
+     */
+    public void resetText() {
+        text = new StringBuilder();
+    }
+
+    /**
+     * Method that returns the last word in text. I.e., the string of characters after the last space.
      * @return last word
      */
     public String getLastWord() {
@@ -220,5 +244,21 @@ public class GlobalKeyLogger implements NativeKeyListener {
      */
     public String[] getPredictedWords() {
         return predictedWords;
+    }
+
+    /**
+     * Returns if the program is paused.
+     * @return if the program is paused
+     */
+    public boolean isPaused() {
+        return paused;
+    }
+
+    /**
+     * Sets the paused state of the program.
+     * @param paused the new paused state
+     */
+    public void setPaused(boolean paused) {
+        this.paused = paused;
     }
 }

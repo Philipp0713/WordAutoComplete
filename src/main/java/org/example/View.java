@@ -2,8 +2,8 @@ package org.example;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Objects;
 
 public class View {
 
@@ -16,35 +16,100 @@ public class View {
      */
     private final JTextField[] textFields;
     /**
-     * Stores all the buttons used to delete the respective word from the database.
+     * Stores all the deleteButtons used to delete the respective word from the database.
      */
-    private final JButton[] buttons;
+    private final JButton[] deleteButtons;
     /**
      * Stores the String of key inputs listened to by the program.
      */
     private final JTextField text;
 
+    private final JButton settingsButton;
+
+    private final JButton pauseButton;
+
+    private final JButton infoButton;
+
+    private final JButton resetButton;
+
+    private final ImageIcon pauseIcon;
+
+    private final ImageIcon playIcon;
+
     public View(int numberOfRows) {
         this.numberOfRows = numberOfRows;
 
         textFields = new JTextField[numberOfRows];
-        buttons = new JButton[numberOfRows];
+        deleteButtons = new JButton[numberOfRows];
 
+
+        ImageIcon deleteIcon = new ImageIcon(
+                Objects.requireNonNull(getClass().getResource("/icons/delete.png"))
+        );
+        deleteIcon.setImage(deleteIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
         for (int i = 0; i < numberOfRows; i++) {
             textFields[i] = new JTextField("");
-            buttons[i] = new JButton("delete");
+
+            deleteButtons[i] = new JButton(deleteIcon);
+            formatButton(deleteButtons[i]);
+            deleteButtons[i].setVisible(false);
+            deleteButtons[i].setPreferredSize(new Dimension(20, 20));
+            deleteButtons[i].setToolTipText("Wort aus Liste löschen.");
         }
+
+        ImageIcon settingsIcon = new ImageIcon(
+                Objects.requireNonNull(getClass().getResource("/icons/settings.png"))
+        );
+        settingsIcon.setImage(settingsIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+        settingsButton = new JButton(settingsIcon);
+        formatButton(settingsButton);
+        settingsButton.setToolTipText("Einstellungen.");
+
+
+        ImageIcon infoIcon = new ImageIcon(
+                Objects.requireNonNull(getClass().getResource("/icons/info.png"))
+        );
+        infoIcon.setImage(infoIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+        infoButton = new JButton(infoIcon);
+        formatButton(infoButton);
+        infoButton.setToolTipText("Informationen.");
+
+
+        ImageIcon resetIcon = new ImageIcon(
+                Objects.requireNonNull(getClass().getResource("/icons/reset.png"))
+        );
+        resetIcon.setImage(resetIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+        resetButton = new JButton(resetIcon);
+        formatButton(resetButton);
+        resetButton.setToolTipText("Text zurücksetzen.");
+
+
+        pauseIcon = new ImageIcon(
+                Objects.requireNonNull(getClass().getResource("/icons/pause.png"))
+        );
+        pauseIcon.setImage(pauseIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+        pauseButton = new JButton(pauseIcon);
+        formatButton(pauseButton);
+        pauseButton.setToolTipText("Programm pausieren.");
+
+        playIcon = new ImageIcon(
+                Objects.requireNonNull(getClass().getResource("/icons/play.png"))
+        );
+        playIcon.setImage(playIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+
+
+
 
         text = new JTextField("");
 
 
         JFrame frame = new JFrame("Word Autocomplete");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(300, 400);
+        frame.setSize(400, 400);
         frame.setAlwaysOnTop(true);
 
         JPanel panel = new JPanel(new GridBagLayout());
-        ((GridBagLayout) panel.getLayout()).columnWidths = new int[] {90, 50, 0};
+        ((GridBagLayout) panel.getLayout()).columnWidths = new int[] {50, 50, 0};
         GridBagConstraints gbc = new GridBagConstraints();
 
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -57,8 +122,7 @@ public class View {
             // Button (column 0)
             gbc.gridx = 0;
             gbc.weightx = 0;
-            buttons[i].setPreferredSize(new Dimension(80, 20));
-            panel.add(buttons[i], gbc);
+            panel.add(deleteButtons[i], gbc);
 
             // Information (column 1)
             gbc.gridx = 1;
@@ -78,10 +142,10 @@ public class View {
             panel.add(textFields[i], gbc);
         }
 
-        // Last row (spanning both columns)
+        // next row (spanning both columns)
         gbc.gridy = numberOfRows;
         gbc.gridx = 0;
-        gbc.gridwidth = 3; // span across all columns
+        gbc.gridwidth = 4; // span across all columns
         gbc.weightx = 1;
 
         text.setEditable(false);
@@ -90,8 +154,29 @@ public class View {
 
         panel.add(text, gbc);
 
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+
+        buttonPanel.add(settingsButton);
+        buttonPanel.add(infoButton);
+        buttonPanel.add(resetButton);
+        buttonPanel.add(pauseButton);
+
+        gbc.gridx = 0;
+        gbc.gridy = numberOfRows + 1;
+        gbc.gridwidth = 3;
+
+        panel.add(buttonPanel, gbc);
+
         frame.add(panel);
         frame.setVisible(true);
+    }
+
+    private static void formatButton(JButton button) {
+        button.setBorderPainted(false);
+        button.setContentAreaFilled(false);
+        button.setFocusPainted(false);
+        button.setOpaque(false);
+        button.setMargin(new Insets(0, 0, 0, 0));
     }
 
     public void updateTextFields(String[] newContent) {
@@ -99,9 +184,15 @@ public class View {
             return;
         }
 
+        String[] displayedWords = new String[newContent.length];
+
+        for (int i = 0; i < displayedWords.length; i++) {
+            displayedWords[i] = "\"" + newContent[i].replace(" ", "⎵") + "\"";
+        }
+
         for (int i = 0; i < numberOfRows; i++) {
-            if (i < newContent.length) {
-                textFields[i].setText(newContent[i]);
+            if (i < displayedWords.length) {
+                textFields[i].setText(displayedWords[i]);
             } else {
                 textFields[i].setText("");
             }
@@ -113,15 +204,43 @@ public class View {
         text.setCaretPosition(newText.length());
     }
 
-    public void addButtonListeners(ActionListener[] listeners) {
-        for (int i = 0; i < buttons.length; i++) {
-            buttons[i].addActionListener(listeners[i]);
+    public void addDeleteButtonListeners(ActionListener[] listeners) {
+        for (int i = 0; i < deleteButtons.length; i++) {
+            deleteButtons[i].addActionListener(listeners[i]);
         }
     }
 
+    public void setPauseButtonToPaused() {
+        pauseButton.setIcon(playIcon);
+    }
+
+    public void setPauseButtonToPlay() {
+        pauseButton.setIcon(pauseIcon);
+    }
+
+    public void setPlayIcon() {
+        pauseButton.setIcon(playIcon);
+    }
+
+    public void addSettingsButtonListener(ActionListener listener) {
+        settingsButton.addActionListener(listener);
+    }
+
+    public void addInfoButtonListener(ActionListener listener) {
+        infoButton.addActionListener(listener);
+    }
+
+    public void addResetButtonListener(ActionListener listener) {
+        resetButton.addActionListener(listener);
+    }
+
+    public void addPauseButtonListener(ActionListener listener) {
+        pauseButton.addActionListener(listener);
+    }
+
     public void updateButtonVisibility(boolean[] visibility) {
-        for (int i = 0; i < buttons.length; i++) {
-            buttons[i].setVisible(visibility[i]);
+        for (int i = 0; i < deleteButtons.length; i++) {
+            deleteButtons[i].setVisible(visibility[i]);
         }
     }
 }

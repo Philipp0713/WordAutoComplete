@@ -40,16 +40,33 @@ public class Controller {
         logger.addListener(this::updateText);
         logger.addListener(this::updateButtonVisibility);
 
-        ActionListener[] listeners = new ActionListener[numberOfPredictedWords];
+        ActionListener[] deleteListeners = new ActionListener[numberOfPredictedWords];
 
-        for (int i = 0; i < listeners.length; i++) {
+        for (int i = 0; i < deleteListeners.length; i++) {
             int finalI = i;
-            listeners[i] = (e) -> {
+            deleteListeners[i] = e -> {
                 logger.deleteWord(logger.getPredictedWords()[finalI]);
             };
         }
 
-        view.addButtonListeners(listeners);
+        view.addDeleteButtonListeners(deleteListeners);
+
+        ActionListener resetListener = e -> {
+            logger.resetText();
+            logger.displayPredictedWords();
+        };
+        view.addResetButtonListener(resetListener);
+
+        ActionListener pauseListener = e -> {
+            logger.setPaused(!logger.isPaused());
+
+            if (logger.isPaused()) {
+                view.setPauseButtonToPaused();
+            } else {
+                view.setPauseButtonToPlay();
+            }
+        };
+        view.addPauseButtonListener(pauseListener);
     }
 
     public void updateTextFields() {
@@ -64,7 +81,7 @@ public class Controller {
         boolean[] visibility = new boolean[numberOfPredictedWords];
         String[] predictedWords = logger.getPredictedWords();
 
-        for (int i = 0; i < visibility.length; i++) {
+        for (int i = 0; i < predictedWords.length; i++) {
             visibility[i] = tree.isUserWord(predictedWords[i]);
         }
         view.updateButtonVisibility(visibility);
@@ -74,4 +91,4 @@ public class Controller {
     public static void main(String[] args) {
         new Controller();
     }
-}//
+}//jetzt versuchen wir es nochmaldamit wurde der Text repräsentiertjetasdfwafd aspfjasfzt kann man scjetsadftztasdf
