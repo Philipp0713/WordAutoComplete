@@ -9,7 +9,7 @@
 ## Funktionalität
 - Buttons müssen verschwinden, wenn der Vorschlag leer ist
 - Option, dass nicht auf Groß-/Kleinschreibung geachtet wird
-- Word Counter Editor
+- Word Counter Editor => Wörter und Zähler
 - Settings button
 - Reset button
 - Pause button
