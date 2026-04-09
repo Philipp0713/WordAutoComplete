@@ -7,6 +7,8 @@
 
 
 ## Funktionalität
+- Buttons müssen verschwinden, wenn der Vorschlag leer ist
+- Option, dass nicht auf Groß-/Kleinschreibung geachtet wird
 - Word Counter Editor
 - Settings button
 - Reset button
