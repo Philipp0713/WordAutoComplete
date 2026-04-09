@@ -20,12 +20,14 @@ public class FrequencyTree {
     private HashMap<String, Integer> userWords;
 
     /**
-     * Stores a map of a large number of common german words and their respective usage. If the usage is smaller, then
+     * Stores a map of a large number of common German words and their respective usage. If the usage is smaller, then
      * it is a less common word.
      */
     private final HashMap<String, Integer> mostCommonWords;
 
-    public FrequencyTree() throws FileNotFoundException {
+    private boolean attentionToLowerUppercase;
+
+    public FrequencyTree(boolean attentionToLowerUppercase) throws FileNotFoundException {
         BufferedReader reader = new BufferedReader(new FileReader("top10000de.txt"));
 
         AtomicInteger usage = new AtomicInteger(0);
@@ -50,7 +52,17 @@ public class FrequencyTree {
             userWords = new HashMap<>();
         }
 
+        this.attentionToLowerUppercase = attentionToLowerUppercase;
+
         updateWords();
+    }
+
+    public boolean isAttentionToLowerUppercase() {
+        return attentionToLowerUppercase;
+    }
+
+    public void setAttentionToLowerUppercase(boolean attentionToLowerUppercase) {
+        this.attentionToLowerUppercase = attentionToLowerUppercase;
     }
 
     public void updateWords() {
@@ -168,9 +180,9 @@ public class FrequencyTree {
      */
     public String[] getAutoCompletedWords(String lastWord, int numberOfWords, int method) {
         return switch (method) {
-            case 0 -> getAutoCompletedWordsUsingPredicate(lastWord, numberOfWords, FrequencyTree::isPrefix);
-            case 1 -> getAutoCompletedWordsUsingPredicate(lastWord, numberOfWords, FrequencyTree::isInfix);
-            case 2 -> getAutoCompletedWordsUsingPredicate(lastWord, numberOfWords, FrequencyTree::isSubsequence);
+            case 0 -> getAutoCompletedWordsUsingPredicate(lastWord, numberOfWords, this::isPrefix);
+            case 1 -> getAutoCompletedWordsUsingPredicate(lastWord, numberOfWords, this::isInfix);
+            case 2 -> getAutoCompletedWordsUsingPredicate(lastWord, numberOfWords, this::isSubsequence);
             default -> null;
         };
     }
@@ -208,10 +220,16 @@ public class FrequencyTree {
      * @param sequence the sequence
      * @return if a given subsequence is a subsequence of a given sequence
      */
-    private static boolean isSubsequence(String subsequence, String sequence) {
+    private boolean isSubsequence(String subsequence, String sequence) {
         if (subsequence.isBlank()) {
             return false;
         }
+
+        if (!attentionToLowerUppercase) {
+            subsequence = subsequence.toLowerCase();
+            sequence = sequence.toLowerCase();
+        }
+
         int pos = 0;
 
         for (int i = 0; i < sequence.length(); i++) {
@@ -232,9 +250,14 @@ public class FrequencyTree {
      * @param string string the prefix is compared to
      * @return if prefix is a prefix of string
      */
-    private static boolean isPrefix(String prefix, String string) {
+    private boolean isPrefix(String prefix, String string) {
         if (string.length() < prefix.length()) {
             return false;
+        }
+
+        if (!attentionToLowerUppercase) {
+            prefix = prefix.toLowerCase();
+            string = string.toLowerCase();
         }
 
         for (int i = 0; i < prefix.length(); i++) {
@@ -251,7 +274,12 @@ public class FrequencyTree {
      * @param string string the infix is compared to
      * @return if infix is an infix of string
      */
-    private static boolean isInfix(String infix, String string) {
+    private boolean isInfix(String infix, String string) {
+
+        if (!attentionToLowerUppercase) {
+            infix = infix.toLowerCase();
+            string = string.toLowerCase();
+        }
 
         for (int i = 0; i < string.length(); i++) {
             if (isPrefix(infix, string.substring(i))) {

@@ -9,18 +9,21 @@ public class Controller {
     /**
      * Reference to the View class, which manages all the UI-Elements.
      */
-    private View view;
+    private final View view;
     private FrequencyTree tree;
     private GlobalKeyLogger logger;
     private int numberOfPredictedWords;
 
     public Controller() {
         numberOfPredictedWords = 9;
+        boolean attentionToLowerUppercase = false;
+
 
         view = new View(numberOfPredictedWords);
+        view.setAttentionToLowerUppercase(attentionToLowerUppercase);
 
         try {
-            tree = new FrequencyTree();
+            tree = new FrequencyTree(attentionToLowerUppercase);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             return;
@@ -51,13 +54,12 @@ public class Controller {
 
         view.addDeleteButtonListeners(deleteListeners);
 
-        ActionListener resetListener = e -> {
+        view.addResetButtonListener(e -> {
             logger.resetText();
             logger.displayPredictedWords();
-        };
-        view.addResetButtonListener(resetListener);
+        });
 
-        ActionListener pauseListener = e -> {
+        view.addPauseButtonListener(e -> {
             logger.setPaused(!logger.isPaused());
 
             if (logger.isPaused()) {
@@ -65,8 +67,18 @@ public class Controller {
             } else {
                 view.setPauseButtonToPlay();
             }
-        };
-        view.addPauseButtonListener(pauseListener);
+        });
+
+        view.addSettingsButtonListener(e -> {
+            logger.setPaused(true);
+            view.setPlayIcon();
+            view.showSettingsMenu();
+        });
+
+        view.addAttentionToLowerUppercaseListener(e -> {
+            tree.setAttentionToLowerUppercase(!tree.isAttentionToLowerUppercase());
+            view.setAttentionToLowerUppercase(tree.isAttentionToLowerUppercase());
+        });
     }
 
     public void updateTextFields() {
@@ -91,4 +103,4 @@ public class Controller {
     public static void main(String[] args) {
         new Controller();
     }
-}//jetzt versuchen wir es nochmaldamit wurde der Text repräsentiertjetasdfwafd aspfjasfzt kann man scjetsadftztasdf
+}//testSchlechtes Autismus-Spektrum-Störung asdf as

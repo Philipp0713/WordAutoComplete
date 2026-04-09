@@ -36,6 +36,10 @@ public class View {
 
     private final ImageIcon playIcon;
 
+    private final JFrame frame;
+
+    private final JCheckBox attentionToLowerUppercase;
+
     public View(int numberOfRows) {
         this.numberOfRows = numberOfRows;
 
@@ -103,7 +107,7 @@ public class View {
         text = new JTextField("");
 
 
-        JFrame frame = new JFrame("Word Autocomplete");
+        frame = new JFrame("Word Autocomplete");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(400, 400);
         frame.setAlwaysOnTop(true);
@@ -169,6 +173,50 @@ public class View {
 
         frame.add(panel);
         frame.setVisible(true);
+
+
+        attentionToLowerUppercase = new JCheckBox(
+                "Textvervollständigung soll auf Groß- und Kleinschreibung achten ", false
+        );
+    }
+
+    public void setAttentionToLowerUppercase(boolean attentionToLowerUppercase) {
+        this.attentionToLowerUppercase.setSelected(attentionToLowerUppercase);
+    }
+
+    public void addAttentionToLowerUppercaseListener(ActionListener listener) {
+        attentionToLowerUppercase.addActionListener(listener);
+    }
+
+
+    public void showSettingsMenu() {
+        JDialog dialog = new JDialog(frame, "Settings", true);
+        dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        dialog.setLayout(new BorderLayout(10, 10));
+
+        JPanel content = new JPanel(new GridLayout(2, 1, 8, 8));
+        content.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+
+        content.add(attentionToLowerUppercase);
+
+
+        JCheckBox alwaysOnTopBox = new JCheckBox("Fenster ist immer im Vordergrund", frame.isAlwaysOnTop());
+        alwaysOnTopBox.addActionListener(e -> frame.setAlwaysOnTop(alwaysOnTopBox.isSelected()));
+        content.add(alwaysOnTopBox);
+
+
+
+        JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(e -> dialog.dispose());
+
+        JPanel buttonRow = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonRow.add(closeButton);
+
+        dialog.add(content, BorderLayout.CENTER);
+        dialog.add(buttonRow, BorderLayout.SOUTH);
+        dialog.pack();
+        dialog.setLocationRelativeTo(frame);
+        dialog.setVisible(true);
     }
 
     private static void formatButton(JButton button) {
