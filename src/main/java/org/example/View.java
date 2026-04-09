@@ -40,7 +40,18 @@ public class View {
 
     private final JCheckBox attentionToLowerUppercase;
 
-    public View(int numberOfRows) {
+    private final  JComboBox<String> methodUsedToGetWords;
+
+    /**
+     * Constructor for the View class.
+     * @param numberOfRows 0 < numberOfRows <= 10
+     * @param attentionToCase true if the program should pay attention to the case of the letters.
+     * @param methodIndex the method that should be used to get the suggestions
+     *                    0: lastWord is a prefix of the suggestions
+     *                    1: lastWord is an infix of the suggestions
+     *                    2: lastWord is a subsequence of the suggestions
+     */
+    public View(int numberOfRows, boolean attentionToCase, int methodIndex) {
         this.numberOfRows = numberOfRows;
 
         textFields = new JTextField[numberOfRows];
@@ -176,8 +187,16 @@ public class View {
 
 
         attentionToLowerUppercase = new JCheckBox(
-                "Textvervollständigung soll auf Groß- und Kleinschreibung achten ", false
+                "Textvervollständigung soll auf Groß- und Kleinschreibung achten ", attentionToCase
         );
+
+        String[] options = {
+                "Buchstaben sind Präfix des Wortes.",
+                "Buchstaben sind Infix des Wortes.",
+                "Buchstaben sind Teilfolge des Wortes."
+        };
+        methodUsedToGetWords = new JComboBox<>(options);
+        setMethodUsedToGetWords(methodIndex);
     }
 
     public void setAttentionToLowerUppercase(boolean attentionToLowerUppercase) {
@@ -188,14 +207,42 @@ public class View {
         attentionToLowerUppercase.addActionListener(listener);
     }
 
+    public void setMethodUsedToGetWords(int index) {
+        if (index < 0 || index >= methodUsedToGetWords.getItemCount()) {
+            return;
+        }
+        methodUsedToGetWords.setSelectedIndex(index);
+    }
+
+    public int getMethodUsedToGetWords() {
+        return methodUsedToGetWords.getSelectedIndex();
+    }
+
+    public void addMethodUsedToGetWordsListener(ActionListener listener) {
+        methodUsedToGetWords.addActionListener(listener);
+    }
+
 
     public void showSettingsMenu() {
         JDialog dialog = new JDialog(frame, "Settings", true);
         dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         dialog.setLayout(new BorderLayout(10, 10));
 
-        JPanel content = new JPanel(new GridLayout(2, 1, 8, 8));
+        JPanel content = new JPanel(new GridLayout(4, 1, 8, 8));
         content.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+
+
+        JTextArea explanationText = new JTextArea("Hier kann ausgewählt werden, wie die Wörter vervollständigt werden.");
+        explanationText.setEditable(false);
+        explanationText.setLineWrap(true);
+        explanationText.setWrapStyleWord(true);
+        explanationText.setOpaque(false);
+        explanationText.setBorder(null);
+        content.add(explanationText);
+
+
+        content.add(methodUsedToGetWords);
+
 
         content.add(attentionToLowerUppercase);
 

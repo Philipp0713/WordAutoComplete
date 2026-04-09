@@ -135,7 +135,7 @@ public class GlobalKeyLogger implements NativeKeyListener {
      * word
      */
     public void updatePredictedWords() {
-        this.predictedWords = tree.getAutoCompletedWords(getLastWord(), numberOfPredictedWords, 2);
+        this.predictedWords = tree.getAutoCompletedWords(getLastWord(), numberOfPredictedWords);
     }
 
     /**

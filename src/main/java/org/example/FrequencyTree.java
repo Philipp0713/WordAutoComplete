@@ -25,9 +25,20 @@ public class FrequencyTree {
      */
     private final HashMap<String, Integer> mostCommonWords;
 
+    /**
+     * Stores if the program should pay attention to the case of the letters.
+     */
     private boolean attentionToLowerUppercase;
 
-    public FrequencyTree(boolean attentionToLowerUppercase) throws FileNotFoundException {
+    /**
+     * the method that should be used to get the suggestions
+     * 0: lastWord is a prefix of the suggestions
+     * 1: lastWord is an infix of the suggestions
+     * 2: lastWord is a subsequence of the suggestions
+     */
+    private int methodUsedToGetWords;
+
+    public FrequencyTree(boolean attentionToLowerUppercase, int methodUsedToGetWords) throws FileNotFoundException {
         BufferedReader reader = new BufferedReader(new FileReader("top10000de.txt"));
 
         AtomicInteger usage = new AtomicInteger(0);
@@ -53,6 +64,7 @@ public class FrequencyTree {
         }
 
         this.attentionToLowerUppercase = attentionToLowerUppercase;
+        this.methodUsedToGetWords = methodUsedToGetWords;
 
         updateWords();
     }
@@ -63,6 +75,14 @@ public class FrequencyTree {
 
     public void setAttentionToLowerUppercase(boolean attentionToLowerUppercase) {
         this.attentionToLowerUppercase = attentionToLowerUppercase;
+    }
+
+    public int getMethodUsedToGetWords() {
+        return methodUsedToGetWords;
+    }
+
+    public void setMethodUsedToGetWords(int methodUsedToGetWords) {
+        this.methodUsedToGetWords = methodUsedToGetWords;
     }
 
     public void updateWords() {
@@ -172,14 +192,10 @@ public class FrequencyTree {
      * Method, that returns the numberOfWords most frequent words that are the most likely to be autocompleted.
      * @param lastWord string that should be autocompleted
      * @param numberOfWords number of words that are suggested as options
-     * @param method the method that should be used to obtain the suggestions
-     *               0: lastWord is a prefix of the suggestions
-     *               1: lastWord is an infix of the suggestions
-     *               2: lastWord is a subsequence of the suggestions
      * @return the most frequent words that are the most likely to be autocompleted
      */
-    public String[] getAutoCompletedWords(String lastWord, int numberOfWords, int method) {
-        return switch (method) {
+    public String[] getAutoCompletedWords(String lastWord, int numberOfWords) {
+        return switch (methodUsedToGetWords) {
             case 0 -> getAutoCompletedWordsUsingPredicate(lastWord, numberOfWords, this::isPrefix);
             case 1 -> getAutoCompletedWordsUsingPredicate(lastWord, numberOfWords, this::isInfix);
             case 2 -> getAutoCompletedWordsUsingPredicate(lastWord, numberOfWords, this::isSubsequence);

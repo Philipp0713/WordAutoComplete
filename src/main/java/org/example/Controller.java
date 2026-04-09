@@ -17,13 +17,13 @@ public class Controller {
     public Controller() {
         numberOfPredictedWords = 9;
         boolean attentionToLowerUppercase = false;
+        int methodUsedToGetWords = 2;
 
 
-        view = new View(numberOfPredictedWords);
-        view.setAttentionToLowerUppercase(attentionToLowerUppercase);
+        view = new View(numberOfPredictedWords, attentionToLowerUppercase, methodUsedToGetWords);
 
         try {
-            tree = new FrequencyTree(attentionToLowerUppercase);
+            tree = new FrequencyTree(attentionToLowerUppercase, methodUsedToGetWords);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             return;
@@ -70,14 +70,19 @@ public class Controller {
         });
 
         view.addSettingsButtonListener(e -> {
-            logger.setPaused(true);
-            view.setPlayIcon();
+//            logger.setPaused(true);
+//            view.setPlayIcon();
             view.showSettingsMenu();
         });
 
         view.addAttentionToLowerUppercaseListener(e -> {
             tree.setAttentionToLowerUppercase(!tree.isAttentionToLowerUppercase());
             view.setAttentionToLowerUppercase(tree.isAttentionToLowerUppercase());
+        });
+
+        view.addMethodUsedToGetWordsListener(e -> {
+            tree.setMethodUsedToGetWords(view.getMethodUsedToGetWords());
+            view.setMethodUsedToGetWords(tree.getMethodUsedToGetWords());
         });
     }
 
@@ -103,4 +108,4 @@ public class Controller {
     public static void main(String[] args) {
         new Controller();
     }
-}//testSchlechtes Autismus-Spektrum-Störung asdf as
+}//

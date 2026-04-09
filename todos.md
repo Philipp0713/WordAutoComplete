@@ -7,9 +7,9 @@
 
 
 ## Funktionalität
+- statt mit 1 das erste vervollständigen mit leertaste
 - Word Counter Editor => Wörter und Zähler
 - Info button
-- statt mit 1 das erste vervollständigen mit leertaste
 - man darf nicht zu schnell leertaste danach drücken => vlt einen puffer einbauen?
 - Generell mit Pfeiltasten rechts/links bewegen können
 - Pfeiltasten oben unten funktionsfähig machen
