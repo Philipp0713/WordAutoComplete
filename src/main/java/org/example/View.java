@@ -120,11 +120,11 @@ public class View {
 
         frame = new JFrame("Word Autocomplete");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(400, 400);
+        frame.setSize(300, 400);
         frame.setAlwaysOnTop(true);
 
         JPanel panel = new JPanel(new GridBagLayout());
-        ((GridBagLayout) panel.getLayout()).columnWidths = new int[] {50, 50, 0};
+        ((GridBagLayout) panel.getLayout()).columnWidths = new int[] {30, 30, 0};
         GridBagConstraints gbc = new GridBagConstraints();
 
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -142,12 +142,17 @@ public class View {
             // Information (column 1)
             gbc.gridx = 1;
             gbc.weightx = 0;
-            JTextField informationField = new JTextField("word " + (i+1));
-            informationField.setOpaque(false);              // No background
-            informationField.setBorder(null);               // Remove border
-            informationField.setEditable(false);
-            informationField.setHorizontalAlignment(JTextField.CENTER);
-            panel.add(informationField, gbc);
+
+
+
+            ImageIcon numberIcon = new ImageIcon(
+                    Objects.requireNonNull(getClass().getResource("/numbers/number"+(i+1)+".png"))
+            );
+            numberIcon.setImage(numberIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+            JLabel numberLabel = new JLabel(numberIcon);
+            panel.add(numberLabel, gbc);
+
+
 
             // TextField (column 2)
             gbc.gridx = 2;

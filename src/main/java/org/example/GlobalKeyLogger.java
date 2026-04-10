@@ -43,6 +43,14 @@ public class GlobalKeyLogger implements NativeKeyListener {
      */
     private boolean paused;
 
+    /**
+     * Stores if the ctrl key is pressed.
+     */
+    private boolean isCtrlPressed;
+
+    /**
+     * Stores all the listeners that should be notified when there is a change relevant to them.
+     */
     private List<Runnable> listeners;
 
     public GlobalKeyLogger(FrequencyTree tree, int numberOfPredictedWords) {
@@ -88,6 +96,31 @@ public class GlobalKeyLogger implements NativeKeyListener {
             return;
         }
 
+        // it should autocomplete the word at index 0 if the space bar is pressed
+//        if (e.getKeyCode() == NativeKeyEvent.VC_SPACE && predictedWords.length > 0) {
+//
+//            if (isCtrlPressed) {
+//                try {
+//                    AutoTyper.writeUsingClipboard(" ");
+//                } catch (AWTException ignored) {}
+//                text.append(" ");
+//            } else {
+//                new Thread(() -> {
+//                    try {
+//                        this.writePredictedWord(0);
+//                    } catch (AWTException ignored) {}
+//                    try {
+//                        AutoTyper.writeUsingClipboard(" ");
+//                    } catch (AWTException ignored) {}
+//                    text.append(" ");
+//                    updatePredictedWords();
+//                    displayPredictedWords();
+//                }).start();
+//                return;
+//            }
+//        }
+
+        // numbers 1 to 9
         for (int i = 2; i <= numberOfPredictedWords+1; i++) {
 
             if(e.getKeyCode() == i && i-2 < predictedWords.length) {
@@ -118,6 +151,9 @@ public class GlobalKeyLogger implements NativeKeyListener {
             case NativeKeyEvent.VC_SPACE:
                 tree.addWordToWords(getLastWord());
                 break;
+            case NativeKeyEvent.VC_CONTROL:
+                isCtrlPressed = true;
+                break;
         }
     }
     /**
@@ -146,7 +182,16 @@ public class GlobalKeyLogger implements NativeKeyListener {
     }
 
     @Override
-    public void nativeKeyReleased(NativeKeyEvent e) {}
+    public void nativeKeyReleased(NativeKeyEvent e) {
+        // if paused, do nothing
+        if(paused) {
+            return;
+        }
+
+        if (e.getKeyCode() == NativeKeyEvent.VC_CONTROL) {
+            isCtrlPressed = false;
+        }
+    }
 
     @Override
     public void nativeKeyTyped(NativeKeyEvent e) {

@@ -8,6 +8,7 @@
 
 ## Funktionalität
 - statt mit 1 das erste vervollständigen mit leertaste
+- Zahlen noch verwendbar machen. Z. B. mit STRG + 1, ...
 - Word Counter Editor => Wörter und Zähler
 - Info button
 - man darf nicht zu schnell leertaste danach drücken => vlt einen puffer einbauen?

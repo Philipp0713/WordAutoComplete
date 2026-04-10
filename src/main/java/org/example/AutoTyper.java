@@ -47,6 +47,9 @@ public class AutoTyper {
                 Thread.sleep(10);
             } catch (InterruptedException ignored) {}
         }
+        try {
+            Thread.sleep(50);
+        } catch (InterruptedException ignored) {}
 
         writingCount++;
 
