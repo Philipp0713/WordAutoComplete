@@ -33,8 +33,15 @@ public class GlobalKeyLogger implements NativeKeyListener {
 
     /**
      * Stores the predicted words after the last time they were updated using the updatePredictedWords() method.
+     * This will be the predicted words used in the internal logic.
      */
-    private String[] predictedWords;
+    private String[] predictedWordsLogic;
+
+    /**
+     * Stores the predicted words after the last time they were updated using the updatePredictedWords() method.
+     * This will be the actual predicted words that are shown to the user.
+     */
+    private String[] predictedWordsEdited;
 
     /**
      * Stores if the program is paused.
@@ -62,7 +69,8 @@ public class GlobalKeyLogger implements NativeKeyListener {
         this.tree = tree;
         this.numberOfPredictedWords = numberOfPredictedWords;
         this.addSpaceAfterAutocompletion = addSpaceAfterAutocompletion;
-        this.predictedWords = new String[numberOfPredictedWords];
+        this.predictedWordsLogic = new String[numberOfPredictedWords];
+        this.predictedWordsEdited = new String[numberOfPredictedWords];
         this.listeners = new ArrayList<>();
     }
 
@@ -127,7 +135,7 @@ public class GlobalKeyLogger implements NativeKeyListener {
         // numbers 1 to 9
         for (int i = 2; i <= numberOfPredictedWords+1; i++) {
 
-            if(e.getKeyCode() == i && i-2 < predictedWords.length) {
+            if(e.getKeyCode() == i && i-2 < predictedWordsEdited.length) {
                 //that means the user pressed the number key labeled i-1
 
                 int finalI = i;
@@ -175,13 +183,14 @@ public class GlobalKeyLogger implements NativeKeyListener {
      * word
      */
     public void updatePredictedWords() {
-        this.predictedWords = tree.getAutoCompletedWords(getLastWord(), numberOfPredictedWords);
+        this.predictedWordsLogic = tree.getAutoCompletedWords(getLastWord(), numberOfPredictedWords);
+        this.predictedWordsEdited = Arrays.copyOf(predictedWordsLogic, predictedWordsLogic.length);
 
         if (addSpaceAfterAutocompletion) {
-            for (int i = 0; i < predictedWords.length; i++) {
+            for (int i = 0; i < predictedWordsEdited.length; i++) {
 
-                if (predictedWords[i].charAt(predictedWords[i].length()-1) != ' ') {
-                    predictedWords[i] += " ";
+                if (predictedWordsEdited[i].charAt(predictedWordsEdited[i].length()-1) != ' ') {
+                    predictedWordsEdited[i] += " ";
                 }
             }
         }
@@ -281,7 +290,7 @@ public class GlobalKeyLogger implements NativeKeyListener {
         text.deleteCharAt(text.length()-1);
         updatePredictedWords();
 
-        String textToAppend = predictedWords[indexInPredictedWords];
+        String textToAppend = predictedWordsEdited[indexInPredictedWords];
 
         AutoTyper.replace(getLastWord(), textToAppend);
 
@@ -297,11 +306,19 @@ public class GlobalKeyLogger implements NativeKeyListener {
     }
 
     /**
-     * Returns the predicted words for the current state
+     * Returns the predicted words for the current state that are shown to the user.
      * @return the predicted words
      */
-    public String[] getPredictedWords() {
-        return predictedWords;
+    public String[] getPredictedWordsEdited() {
+        return predictedWordsEdited;
+    }
+
+    /**
+     * Returns the predicted words that are used internally by the program.
+     * @return the predicted words
+     */
+    public String[] getPredictedWordsLogic() {
+        return predictedWordsLogic;
     }
 
     /**

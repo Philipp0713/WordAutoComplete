@@ -54,7 +54,7 @@ public class Controller {
         for (int i = 0; i < deleteListeners.length; i++) {
             int finalI = i;
             deleteListeners[i] = e -> {
-                logger.deleteWord(logger.getPredictedWords()[finalI]);
+                logger.deleteWord(logger.getPredictedWordsLogic()[finalI]);
             };
         }
 
@@ -111,7 +111,7 @@ public class Controller {
     }
 
     public void updateTextFields() {
-        view.updateTextFields(logger.getPredictedWords());
+        view.updateTextFields(logger.getPredictedWordsEdited());
     }
 
     public void updateText() {
@@ -120,7 +120,7 @@ public class Controller {
 
     public void updateButtonVisibility() {
         boolean[] visibility = new boolean[numberOfPredictedWords];
-        String[] predictedWords = logger.getPredictedWords();
+        String[] predictedWords = logger.getPredictedWordsLogic();
 
         for (int i = 0; i < predictedWords.length; i++) {
             visibility[i] = tree.isUserWord(predictedWords[i]);
