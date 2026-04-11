@@ -63,6 +63,8 @@ public class Controller {
         view.addResetButtonListener(e -> {
             logger.resetText();
             logger.displayPredictedWords();
+            logger.updatePredictedWords();
+            logger.displayPredictedWords();
         });
 
         view.addPauseButtonListener(e -> {

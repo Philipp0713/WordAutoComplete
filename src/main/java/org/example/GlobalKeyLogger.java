@@ -108,30 +108,6 @@ public class GlobalKeyLogger implements NativeKeyListener {
             return;
         }
 
-        // it should autocomplete the word at index 0 if the space bar is pressed
-//        if (e.getKeyCode() == NativeKeyEvent.VC_SPACE && predictedWords.length > 0) {
-//
-//            if (isCtrlPressed) {
-//                try {
-//                    AutoTyper.writeUsingClipboard(" ");
-//                } catch (AWTException ignored) {}
-//                text.append(" ");
-//            } else {
-//                new Thread(() -> {
-//                    try {
-//                        this.writePredictedWord(0);
-//                    } catch (AWTException ignored) {}
-//                    try {
-//                        AutoTyper.writeUsingClipboard(" ");
-//                    } catch (AWTException ignored) {}
-//                    text.append(" ");
-//                    updatePredictedWords();
-//                    displayPredictedWords();
-//                }).start();
-//                return;
-//            }
-//        }
-
         // numbers 1 to 9
         for (int i = 2; i <= numberOfPredictedWords+1; i++) {
 
@@ -145,6 +121,10 @@ public class GlobalKeyLogger implements NativeKeyListener {
                     } catch (AWTException ignored) {}
                     updatePredictedWords();
                     displayPredictedWords();
+
+                    if (addSpaceAfterAutocompletion) {
+                        tree.addWordToWords(getLastWordWithoutSpace());
+                    }
                 }).start();
                 return;
             }
@@ -264,6 +244,25 @@ public class GlobalKeyLogger implements NativeKeyListener {
     public String getLastWord() {
         String textAsString = this.getText();
 
+        return getLastWordOfString(textAsString);
+    }
+
+    /**
+     * Method that returns the last word in text without the last spaces.
+     * @return last word without the last spaces
+     */
+    public String getLastWordWithoutSpace() {
+        String textAsString = this.getText().trim();
+
+        return getLastWordOfString(textAsString);
+    }
+
+    /**
+     * Method that returns the last word in the String textAsString.
+     * @param textAsString String that will be split
+     * @return last word in the String textAsString
+     */
+    private String getLastWordOfString(String textAsString) {
         if (textAsString.isEmpty()) {
             return "";
         }
