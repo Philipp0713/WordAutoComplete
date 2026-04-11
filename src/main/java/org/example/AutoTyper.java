@@ -73,7 +73,7 @@ public class AutoTyper {
 
     /**
      * Method used to replace a String word with a String replacement. It does that by repeatedly pressing backspace
-     * to delete word and then uses writeWithClipboard() to paste the new word at the position.
+     * to delete the word and then uses writeWithClipboard() to paste the new word at the position.
      * @param word old word
      * @param replacement replacement word
      * @throws AWTException if something goes wrong with writing or copy-pasting

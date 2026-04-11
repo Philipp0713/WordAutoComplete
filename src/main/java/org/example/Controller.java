@@ -17,10 +17,16 @@ public class Controller {
     public Controller() {
         numberOfPredictedWords = 9;
         boolean attentionToLowerUppercase = false;
+        boolean addSpaceAfterAutocompletion = true;
         int methodUsedToGetWords = 2;
 
 
-        view = new View(numberOfPredictedWords, attentionToLowerUppercase, methodUsedToGetWords);
+        view = new View(
+                numberOfPredictedWords,
+                attentionToLowerUppercase,
+                addSpaceAfterAutocompletion,
+                methodUsedToGetWords
+        );
 
         try {
             tree = new FrequencyTree(attentionToLowerUppercase, methodUsedToGetWords);
@@ -36,7 +42,7 @@ public class Controller {
             return;
         }
 
-        logger = new GlobalKeyLogger(tree, numberOfPredictedWords);
+        logger = new GlobalKeyLogger(tree, numberOfPredictedWords, addSpaceAfterAutocompletion);
         GlobalScreen.addNativeKeyListener(logger);
 
         logger.addListener(this::updateTextFields);
@@ -75,14 +81,32 @@ public class Controller {
             view.showSettingsMenu();
         });
 
+        addListenersToSettingsMenu();
+    }
+
+    /**
+     * Adds listeners to the settings menu.
+     */
+    private void addListenersToSettingsMenu() {
         view.addAttentionToLowerUppercaseListener(e -> {
             tree.setAttentionToLowerUppercase(!tree.isAttentionToLowerUppercase());
             view.setAttentionToLowerUppercase(tree.isAttentionToLowerUppercase());
+            logger.updatePredictedWords();
+            logger.displayPredictedWords();
         });
 
         view.addMethodUsedToGetWordsListener(e -> {
             tree.setMethodUsedToGetWords(view.getMethodUsedToGetWords());
             view.setMethodUsedToGetWords(tree.getMethodUsedToGetWords());
+            logger.updatePredictedWords();
+            logger.displayPredictedWords();
+        });
+
+        view.addAddSpaceAfterAutocompletionListener(e -> {
+            logger.setAddSpaceAfterAutocompletion(!logger.isAddSpaceAfterAutocompletion());
+            view.setAddSpaceAfterAutocompletion(logger.isAddSpaceAfterAutocompletion());
+            logger.updatePredictedWords();
+            logger.displayPredictedWords();
         });
     }
 
@@ -108,4 +132,4 @@ public class Controller {
     public static void main(String[] args) {
         new Controller();
     }
-}//Autismus-Spektrum-Störung möglicherweise
+}//

@@ -38,21 +38,24 @@ public class View {
 
     private final JFrame frame;
 
-    private final JCheckBox attentionToLowerUppercase;
+    private final JCheckBox attentionToLowerUppercaseCheckbox;
 
-    private final  JComboBox<String> methodUsedToGetWords;
+    private final JCheckBox addSpaceAfterAutocompletionCheckbox;
+
+    private final JComboBox<String> methodUsedToGetWords;
 
     /**
      * Constructor for the View class.
      * @param numberOfRows 0 < numberOfRows <= 10
-     * @param attentionToCase true if the program should pay attention to the case of the letters.
+     * @param attentionToLowerUppercase true if the program should pay attention to the case of the letters.
      * @param methodIndex the method that should be used to get the suggestions
      *                    0: lastWord is a prefix of the suggestions
      *                    1: lastWord is an infix of the suggestions
      *                    2: lastWord is a subsequence of the suggestions
      */
-    public View(int numberOfRows, boolean attentionToCase, int methodIndex) {
+    public View(int numberOfRows, boolean attentionToLowerUppercase, boolean addSpaceAfterAutocompletion, int methodIndex) {
         this.numberOfRows = numberOfRows;
+        int numberOfColumns = 3;
 
         textFields = new JTextField[numberOfRows];
         deleteButtons = new JButton[numberOfRows];
@@ -165,7 +168,7 @@ public class View {
         // next row (spanning both columns)
         gbc.gridy = numberOfRows;
         gbc.gridx = 0;
-        gbc.gridwidth = 4; // span across all columns
+        gbc.gridwidth = numberOfColumns; // span across all columns
         gbc.weightx = 1;
 
         text.setEditable(false);
@@ -183,7 +186,7 @@ public class View {
 
         gbc.gridx = 0;
         gbc.gridy = numberOfRows + 1;
-        gbc.gridwidth = 3;
+        gbc.gridwidth = numberOfColumns;
 
         panel.add(buttonPanel, gbc);
 
@@ -191,8 +194,15 @@ public class View {
         frame.setVisible(true);
 
 
-        attentionToLowerUppercase = new JCheckBox(
-                "Textvervollständigung soll auf Groß- und Kleinschreibung achten ", attentionToCase
+        attentionToLowerUppercaseCheckbox = new JCheckBox(
+                "Textvervollständigung soll auf Groß- und Kleinschreibung achten ", attentionToLowerUppercase
+        );
+
+        addSpaceAfterAutocompletionCheckbox = new JCheckBox(
+                "<html><body style='width: 300px'>" +
+                        "Wenn ein Wort vervollständigt wird, soll immer ein Leerzeichen am Ende hinzugefügt werden." +
+                        "</body></html>",
+                addSpaceAfterAutocompletion
         );
 
         String[] options = {
@@ -205,11 +215,19 @@ public class View {
     }
 
     public void setAttentionToLowerUppercase(boolean attentionToLowerUppercase) {
-        this.attentionToLowerUppercase.setSelected(attentionToLowerUppercase);
+        this.attentionToLowerUppercaseCheckbox.setSelected(attentionToLowerUppercase);
     }
 
     public void addAttentionToLowerUppercaseListener(ActionListener listener) {
-        attentionToLowerUppercase.addActionListener(listener);
+        attentionToLowerUppercaseCheckbox.addActionListener(listener);
+    }
+
+    public void setAddSpaceAfterAutocompletion(boolean addSpaceAfterAutocompletion) {
+        this.addSpaceAfterAutocompletionCheckbox.setSelected(addSpaceAfterAutocompletion);
+    }
+
+    public void addAddSpaceAfterAutocompletionListener(ActionListener listener) {
+        addSpaceAfterAutocompletionCheckbox.addActionListener(listener);
     }
 
     public void setMethodUsedToGetWords(int index) {
@@ -233,7 +251,7 @@ public class View {
         dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         dialog.setLayout(new BorderLayout(10, 10));
 
-        JPanel content = new JPanel(new GridLayout(4, 1, 8, 8));
+        JPanel content = new JPanel(new GridLayout(5, 1, 8, 8));
         content.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
 
@@ -249,7 +267,10 @@ public class View {
         content.add(methodUsedToGetWords);
 
 
-        content.add(attentionToLowerUppercase);
+        content.add(attentionToLowerUppercaseCheckbox);
+
+
+        content.add(addSpaceAfterAutocompletionCheckbox);
 
 
         JCheckBox alwaysOnTopBox = new JCheckBox("Fenster ist immer im Vordergrund", frame.isAlwaysOnTop());
@@ -266,6 +287,8 @@ public class View {
 
         dialog.add(content, BorderLayout.CENTER);
         dialog.add(buttonRow, BorderLayout.SOUTH);
+        dialog.setPreferredSize(new Dimension(450, 300));
+        dialog.setResizable(false);
         dialog.pack();
         dialog.setLocationRelativeTo(frame);
         dialog.setVisible(true);

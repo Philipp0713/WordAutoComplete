@@ -4,11 +4,9 @@ import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 import com.github.kwhat.jnativehook.keyboard.NativeKeyListener;
 
 import java.awt.*;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class GlobalKeyLogger implements NativeKeyListener {
 
@@ -26,7 +24,7 @@ public class GlobalKeyLogger implements NativeKeyListener {
     /**
      * Object used to generate the predicted words.
      */
-    private FrequencyTree tree;
+    private final FrequencyTree tree;
 
     /**
      * Stores the number of words that should be predicted and shown to the user at every timeframe.
@@ -49,15 +47,21 @@ public class GlobalKeyLogger implements NativeKeyListener {
     private boolean isCtrlPressed;
 
     /**
+     * Stores if a space should be added to the end of an autocompleted word.
+     */
+    private boolean addSpaceAfterAutocompletion;
+
+    /**
      * Stores all the listeners that should be notified when there is a change relevant to them.
      */
-    private List<Runnable> listeners;
+    private final List<Runnable> listeners;
 
-    public GlobalKeyLogger(FrequencyTree tree, int numberOfPredictedWords) {
+    public GlobalKeyLogger(FrequencyTree tree, int numberOfPredictedWords, boolean addSpaceAfterAutocompletion) {
         this.paused = false;
         this.text = new StringBuilder();
         this.tree = tree;
         this.numberOfPredictedWords = numberOfPredictedWords;
+        this.addSpaceAfterAutocompletion = addSpaceAfterAutocompletion;
         this.predictedWords = new String[numberOfPredictedWords];
         this.listeners = new ArrayList<>();
     }
@@ -172,6 +176,15 @@ public class GlobalKeyLogger implements NativeKeyListener {
      */
     public void updatePredictedWords() {
         this.predictedWords = tree.getAutoCompletedWords(getLastWord(), numberOfPredictedWords);
+
+        if (addSpaceAfterAutocompletion) {
+            for (int i = 0; i < predictedWords.length; i++) {
+
+                if (predictedWords[i].charAt(predictedWords[i].length()-1) != ' ') {
+                    predictedWords[i] += " ";
+                }
+            }
+        }
     }
 
     /**
@@ -305,5 +318,21 @@ public class GlobalKeyLogger implements NativeKeyListener {
      */
     public void setPaused(boolean paused) {
         this.paused = paused;
+    }
+
+    /**
+     * Returns if a space should be added to the end of an autocompleted word.
+     * @return if a space should be added to the end of an autocompleted word
+     */
+    public boolean isAddSpaceAfterAutocompletion() {
+        return addSpaceAfterAutocompletion;
+    }
+
+    /**
+     * Sets if a space should be added to the end of an autocompleted word.
+     * @param addSpaceAfterAutocompletion if a space should be added to the end of an autocompleted word
+     */
+    public void setAddSpaceAfterAutocompletion(boolean addSpaceAfterAutocompletion) {
+        this.addSpaceAfterAutocompletion = addSpaceAfterAutocompletion;
     }
 }
