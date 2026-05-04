@@ -92,6 +92,20 @@ public class GlobalKeyLogger implements NativeKeyListener {
         }
     }
 
+    /**
+     * Returns for a given string, if it contains whitespace.
+     * @param string the given string
+     * @return if it contains whitespace
+     */
+    private boolean hasWhitespace(String string) {
+        for (int i = 0; i < string.length(); i++) {
+            if (Character.isWhitespace(string.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public void nativeKeyPressed(NativeKeyEvent e) {
 //        System.out.println("Taste gedrückt: " + NativeKeyEvent.getKeyText(e.getKeyCode()));
@@ -116,14 +130,16 @@ public class GlobalKeyLogger implements NativeKeyListener {
 
                 int finalI = i;
                 new Thread(() -> {
+                    String predictedWord = predictedWordsLogic[finalI-2];
+
                     try {
                         this.writePredictedWord(finalI-2);
                     } catch (AWTException ignored) {}
                     updatePredictedWords();
                     displayPredictedWords();
 
-                    if (addSpaceAfterAutocompletion) {
-                        tree.addWordToWords(getLastWordWithoutSpace());
+                    if (addSpaceAfterAutocompletion || this.hasWhitespace(predictedWord)) {
+                        tree.addPraseToWords(predictedWord);
                     }
                 }).start();
                 return;

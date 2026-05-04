@@ -116,6 +116,27 @@ public class FrequencyTree {
     }
 
     /**
+     * Adds a given phrase to userWords. Unlike addWordToWords() this method works for whole phrases. I.e. it adds the
+     * whole phrase (even if it has Spaces within) to userWords.
+     * @param phrase the phrase that is to be added
+     */
+    public void addPraseToWords(String phrase) {
+        if (phrase.isBlank()) {
+            return;
+        }
+        userWords.put(phrase, userWords.getOrDefault(phrase, 0) + 1);
+
+        updateWords();
+
+        try {
+            saveUserWords();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    /**
      * Adds the String word to userWords. If it is already present, the usage-counter will be incremented.
      * @param word the word that is added.
      */

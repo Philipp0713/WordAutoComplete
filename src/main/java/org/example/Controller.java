@@ -78,8 +78,6 @@ public class Controller {
         });
 
         view.addSettingsButtonListener(e -> {
-//            logger.setPaused(true);
-//            view.setPlayIcon();
             view.showSettingsMenu();
         });
 
