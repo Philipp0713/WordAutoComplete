@@ -120,7 +120,7 @@ public class FrequencyTree {
      * whole phrase (even if it has Spaces within) to userWords.
      * @param phrase the phrase that is to be added
      */
-    public void addPraseToWords(String phrase) {
+    public void addPhraseToWords(String phrase) {
         if (phrase.isBlank()) {
             return;
         }
@@ -287,7 +287,7 @@ public class FrequencyTree {
      * @param string string the prefix is compared to
      * @return if prefix is a prefix of string
      */
-    private boolean isPrefix(String prefix, String string) {
+    public boolean isPrefix(String prefix, String string) {
         if (string.length() < prefix.length()) {
             return false;
         }
@@ -324,6 +324,31 @@ public class FrequencyTree {
             }
         }
         return false;
+    }
+
+    /**
+     * Returns if the String suffix is a suffix of the String string.
+     * @param suffix potential suffix
+     * @param string string the suffix is compared to
+     * @return if suffix is a suffix of string
+     */
+    public boolean isSuffix(String suffix, String string) {
+        if (string.length() < suffix.length()) {
+            return false;
+        }
+
+        if (!attentionToLowerUppercase) {
+            suffix = suffix.toLowerCase();
+            string = string.toLowerCase();
+        }
+
+        int offset = string.length() - suffix.length();
+        for (int i = 0; i < suffix.length(); i++) {
+            if (suffix.charAt(i) != string.charAt(offset + i)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static class WordWithUsage implements Comparable<WordWithUsage> {

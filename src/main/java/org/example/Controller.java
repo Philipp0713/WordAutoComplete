@@ -49,12 +49,16 @@ public class Controller {
         logger.addListener(this::updateText);
         logger.addListener(this::updateButtonVisibility);
 
-        ActionListener[] deleteListeners = new ActionListener[numberOfPredictedWords];
+        ActionListener[] deleteListeners = new ActionListener[View.MAX_NUMBER_OF_ROWS];
 
         for (int i = 0; i < deleteListeners.length; i++) {
             int finalI = i;
             deleteListeners[i] = e -> {
-                logger.deleteWord(logger.getPredictedWordsLogic()[finalI]);
+                String[] predictedWords = logger.getPredictedWordsLogic();
+
+                if (finalI < predictedWords.length) {
+                    logger.deleteWord(predictedWords[finalI]);
+                }
             };
         }
 
@@ -95,6 +99,12 @@ public class Controller {
             logger.displayPredictedWords();
         });
 
+        view.addNumberOfRowsListener(e -> {
+            numberOfPredictedWords = view.getNumberOfRows();
+            view.setNumberOfRows(numberOfPredictedWords);
+            logger.setNumberOfPredictedWords(numberOfPredictedWords);
+        });
+
         view.addMethodUsedToGetWordsListener(e -> {
             tree.setMethodUsedToGetWords(view.getMethodUsedToGetWords());
             view.setMethodUsedToGetWords(tree.getMethodUsedToGetWords());
@@ -132,4 +142,4 @@ public class Controller {
     public static void main(String[] args) {
         new Controller();
     }
-}//
+}

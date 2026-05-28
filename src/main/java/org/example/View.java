@@ -1,16 +1,20 @@
 package org.example;
 
 import javax.swing.*;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.Objects;
 
 public class View {
 
+    public static final int MIN_NUMBER_OF_ROWS = 1;
+    public static final int MAX_NUMBER_OF_ROWS = 9;
+
     /**
-     * Stores the number of rows in the table. I.e. the number of autocompleted words that will be shown.
+     * Stores the number of rows in the table. I.e., the number of autocompleted words that will be shown.
      */
-    private final int numberOfRows;
+    private int numberOfRows;
     /**
      * Stores all the text fields where the autocompleted words will be displayed.
      */
@@ -19,6 +23,10 @@ public class View {
      * Stores all the deleteButtons used to delete the respective word from the database.
      */
     private final JButton[] deleteButtons;
+
+    private final JLabel[] numberLabels;
+
+    private final JSpinner numberOfRowsSpinner;
     /**
      * Stores the String of key inputs listened to by the program.
      */
@@ -57,15 +65,16 @@ public class View {
         this.numberOfRows = numberOfRows;
         int numberOfColumns = 3;
 
-        textFields = new JTextField[numberOfRows];
-        deleteButtons = new JButton[numberOfRows];
+        textFields = new JTextField[MAX_NUMBER_OF_ROWS];
+        deleteButtons = new JButton[MAX_NUMBER_OF_ROWS];
+        numberLabels = new JLabel[MAX_NUMBER_OF_ROWS];
 
 
         ImageIcon deleteIcon = new ImageIcon(
                 Objects.requireNonNull(getClass().getResource("/icons/delete.png"))
         );
         deleteIcon.setImage(deleteIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
-        for (int i = 0; i < numberOfRows; i++) {
+        for (int i = 0; i < MAX_NUMBER_OF_ROWS; i++) {
             textFields[i] = new JTextField("");
 
             deleteButtons[i] = new JButton(deleteIcon);
@@ -123,7 +132,7 @@ public class View {
 
         frame = new JFrame("Word Autocomplete");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(300, 400);
+        frame.setSize(300, 130 + 30*this.numberOfRows);
         frame.setAlwaysOnTop(true);
 
         JPanel panel = new JPanel(new GridBagLayout());
@@ -134,7 +143,7 @@ public class View {
         gbc.insets = new Insets(5, 5, 5, 5);
 
         // Create normal rows
-        for (int i = 0; i < numberOfRows; i++) {
+        for (int i = 0; i < MAX_NUMBER_OF_ROWS; i++) {
             gbc.gridy = i;
 
             // Button (column 0)
@@ -152,8 +161,8 @@ public class View {
                     Objects.requireNonNull(getClass().getResource("/numbers/number"+(i+1)+".png"))
             );
             numberIcon.setImage(numberIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
-            JLabel numberLabel = new JLabel(numberIcon);
-            panel.add(numberLabel, gbc);
+            numberLabels[i] = new JLabel(numberIcon);
+            panel.add(numberLabels[i], gbc);
 
 
 
@@ -166,7 +175,7 @@ public class View {
         }
 
         // next row (spanning both columns)
-        gbc.gridy = numberOfRows;
+        gbc.gridy = MAX_NUMBER_OF_ROWS;
         gbc.gridx = 0;
         gbc.gridwidth = numberOfColumns; // span across all columns
         gbc.weightx = 1;
@@ -185,7 +194,7 @@ public class View {
         buttonPanel.add(pauseButton);
 
         gbc.gridx = 0;
-        gbc.gridy = numberOfRows + 1;
+        gbc.gridy = MAX_NUMBER_OF_ROWS + 1;
         gbc.gridwidth = numberOfColumns;
 
         panel.add(buttonPanel, gbc);
@@ -212,6 +221,41 @@ public class View {
         };
         methodUsedToGetWords = new JComboBox<>(options);
         setMethodUsedToGetWords(methodIndex);
+
+        numberOfRowsSpinner = new JSpinner(
+                new SpinnerNumberModel(this.numberOfRows, MIN_NUMBER_OF_ROWS, MAX_NUMBER_OF_ROWS, 1)
+        );
+
+        setNumberOfRows(this.numberOfRows);
+    }
+
+    public int getNumberOfRows() {
+        return numberOfRowsSpinner.getValue() == null ? this.numberOfRows : (int) numberOfRowsSpinner.getValue();
+    }
+
+    public void setNumberOfRows(int numberOfRows) {
+        this.numberOfRows = Math.clamp(numberOfRows, MIN_NUMBER_OF_ROWS, MAX_NUMBER_OF_ROWS);
+
+        for (int i = 0; i < MAX_NUMBER_OF_ROWS; i++) {
+            boolean visible = i < this.numberOfRows;
+            textFields[i].setVisible(visible);
+            numberLabels[i].setVisible(visible);
+
+            if (!visible) {
+                textFields[i].setText("");
+                deleteButtons[i].setVisible(false);
+            }
+        }
+
+        if (numberOfRowsSpinner != null) {
+            numberOfRowsSpinner.setValue(this.numberOfRows);
+        }
+
+        frame.setSize(frame.getWidth(), 130 + 30*this.numberOfRows);
+    }
+
+    public void addNumberOfRowsListener(ChangeListener listener) {
+        numberOfRowsSpinner.addChangeListener(listener);
     }
 
     public void setAttentionToLowerUppercase(boolean attentionToLowerUppercase) {
@@ -251,7 +295,7 @@ public class View {
         dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         dialog.setLayout(new BorderLayout(10, 10));
 
-        JPanel content = new JPanel(new GridLayout(5, 1, 8, 8));
+        JPanel content = new JPanel(new GridLayout(6, 1, 8, 8));
         content.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
 
@@ -265,6 +309,11 @@ public class View {
 
 
         content.add(methodUsedToGetWords);
+
+        JPanel numberOfRowsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        numberOfRowsPanel.add(new JLabel("Anzahl angezeigter Vorschläge: "));
+        numberOfRowsPanel.add(numberOfRowsSpinner);
+        content.add(numberOfRowsPanel);
 
 
         content.add(attentionToLowerUppercaseCheckbox);
@@ -287,7 +336,7 @@ public class View {
 
         dialog.add(content, BorderLayout.CENTER);
         dialog.add(buttonRow, BorderLayout.SOUTH);
-        dialog.setPreferredSize(new Dimension(450, 300));
+        dialog.setPreferredSize(new Dimension(450, 340));
         dialog.setResizable(false);
         dialog.pack();
         dialog.setLocationRelativeTo(frame);
@@ -362,8 +411,8 @@ public class View {
     }
 
     public void updateButtonVisibility(boolean[] visibility) {
-        for (int i = 0; i < deleteButtons.length; i++) {
-            deleteButtons[i].setVisible(visibility[i]);
+        for (int i = 0; i < deleteButtons.length && i < visibility.length; i++) {
+            deleteButtons[i].setVisible(visibility[i] && i < numberOfRows);
         }
     }
 }

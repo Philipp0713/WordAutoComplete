@@ -8,12 +8,7 @@
 
 
 ## Funktionalität
-- Mit Zahl 0 die letzten beiden Vorschläge zusammen hinzufügen
-    - "Die Patientin" + "kom" + 0 => "Die Patientin kommt" wird vervollständigt und hinzugefügt
-    - "Die Patientin kommt" ist dann ein String => kann diesen String dann wieder erweitern
 - Boost Knopf bei jedem Vorschlag => kann z. B. +10 in der Häufigkeit addieren
-- nicht immer 9 vorschläge => auch mal weniger Einstellen können
-- statt mit 1 das erste vervollständigen mit leertaste
 - Zahlen noch verwendbar machen. Z. B. mit STRG + 1, ...
 - Word Counter Editor => Wörter und Zähler
 - Info button

@@ -16,6 +16,11 @@ public class GlobalKeyLogger implements NativeKeyListener {
     private StringBuilder text;
 
     /**
+     * Stores the text as a list of Strings. Each String is in the list of autocompleted words.
+     */
+    private ArrayList<String> textAsWords;
+
+    /**
      * Stores the current position of the cursor. Since this class can only listen to the left/right arrow keys, it is
      * only able to stay consistent regarding these movements. TODO
      */
@@ -66,6 +71,7 @@ public class GlobalKeyLogger implements NativeKeyListener {
     public GlobalKeyLogger(FrequencyTree tree, int numberOfPredictedWords, boolean addSpaceAfterAutocompletion) {
         this.paused = false;
         this.text = new StringBuilder();
+        this.textAsWords = new ArrayList<>();
         this.tree = tree;
         this.numberOfPredictedWords = numberOfPredictedWords;
         this.addSpaceAfterAutocompletion = addSpaceAfterAutocompletion;
@@ -122,6 +128,26 @@ public class GlobalKeyLogger implements NativeKeyListener {
             return;
         }
 
+        // number 0
+        if (e.getKeyCode() == NativeKeyEvent.VC_0) {
+            new Thread(() -> {
+                String predictedWord = textAsWords.getLast() + " " + predictedWordsLogic[0];
+
+                try {
+                    this.writePredictedWord(0);
+                    textAsWords.removeLast();
+                    textAsWords.add(predictedWord);
+                } catch (AWTException ignored) {}
+                updatePredictedWords();
+                displayPredictedWords();
+
+                if (addSpaceAfterAutocompletion || this.hasWhitespace(predictedWord)) {
+                    tree.addPhraseToWords(predictedWord);
+                }
+            }).start();
+            return;
+        }
+
         // numbers 1 to 9
         for (int i = 2; i <= numberOfPredictedWords+1; i++) {
 
@@ -134,12 +160,13 @@ public class GlobalKeyLogger implements NativeKeyListener {
 
                     try {
                         this.writePredictedWord(finalI-2);
+                        textAsWords.add(predictedWord);
                     } catch (AWTException ignored) {}
                     updatePredictedWords();
                     displayPredictedWords();
 
                     if (addSpaceAfterAutocompletion || this.hasWhitespace(predictedWord)) {
-                        tree.addPraseToWords(predictedWord);
+                        tree.addPhraseToWords(predictedWord);
                     }
                 }).start();
                 return;
@@ -152,12 +179,19 @@ public class GlobalKeyLogger implements NativeKeyListener {
                 updatePredictedWords();
                 displayPredictedWords();
                 break;
-            case NativeKeyEvent.VC_UP, NativeKeyEvent.VC_DOWN, NativeKeyEvent.VC_LEFT, NativeKeyEvent.VC_RIGHT:
+            case NativeKeyEvent.VC_UP, NativeKeyEvent.VC_DOWN: //NativeKeyEvent.VC_LEFT, NativeKeyEvent.VC_RIGHT:
                 // we reset the text
-                text = new StringBuilder();
+                resetText();
                 break;
             case NativeKeyEvent.VC_SPACE:
-                tree.addWordToWords(getLastWord());
+                if (textAsWords.isEmpty() || !tree.isSuffix(getLastWord(), textAsWords.getLast())) {
+                    tree.addWordToWords(getLastWord());
+                    textAsWords.add(getLastWord());
+                    updatePredictedWords();
+                    displayPredictedWords();
+                } else {
+                    tree.addPhraseToWords(textAsWords.getLast());
+                }
                 break;
             case NativeKeyEvent.VC_CONTROL:
                 isCtrlPressed = true;
@@ -190,6 +224,12 @@ public class GlobalKeyLogger implements NativeKeyListener {
                 }
             }
         }
+    }
+
+    public void setNumberOfPredictedWords(int numberOfPredictedWords) {
+        this.numberOfPredictedWords = Math.clamp(numberOfPredictedWords, 1, 9);
+        updatePredictedWords();
+        displayPredictedWords();
     }
 
     /**
@@ -251,6 +291,9 @@ public class GlobalKeyLogger implements NativeKeyListener {
      */
     public void resetText() {
         text = new StringBuilder();
+        textAsWords.clear();
+        updatePredictedWords();
+        displayPredictedWords();
     }
 
     /**
@@ -307,11 +350,22 @@ public class GlobalKeyLogger implements NativeKeyListener {
 
         String textToAppend = predictedWordsEdited[indexInPredictedWords];
 
-        AutoTyper.replace(getLastWord(), textToAppend);
+        String stringToReplace = getLastWord();;
 
-        String lastWord = getLastWord();
+        if (!textAsWords.isEmpty()) {
 
-        for (int i = 0; i < lastWord.length(); i++) {
+            for (int i = 0; i < text.length(); i++) {
+                String substring = text.substring(i, text.length());
+                if (tree.isPrefix(substring, textAsWords.getLast())) {
+                    stringToReplace = substring;
+                    break;
+                }
+            }
+        }
+
+        AutoTyper.replace(stringToReplace, textToAppend);
+
+        for (int i = 0; i < stringToReplace.length(); i++) {
             text.deleteCharAt(text.length()-1);
         }
 
