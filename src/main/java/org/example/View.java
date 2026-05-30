@@ -11,6 +11,8 @@ public class View {
     public static final int MIN_NUMBER_OF_ROWS = 1;
     public static final int MAX_NUMBER_OF_ROWS = 9;
 
+    private static final int ROW_HEIGHT = 30;
+
     /**
      * Stores the number of rows in the table. I.e., the number of autocompleted words that will be shown.
      */
@@ -69,25 +71,33 @@ public class View {
         deleteButtons = new JButton[MAX_NUMBER_OF_ROWS];
         numberLabels = new JLabel[MAX_NUMBER_OF_ROWS];
 
+        int iconSize = ROW_HEIGHT - 10;
+
 
         ImageIcon deleteIcon = new ImageIcon(
                 Objects.requireNonNull(getClass().getResource("/icons/delete.png"))
         );
-        deleteIcon.setImage(deleteIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+        deleteIcon.setImage(deleteIcon.getImage().getScaledInstance(iconSize, iconSize, Image.SCALE_SMOOTH));
         for (int i = 0; i < MAX_NUMBER_OF_ROWS; i++) {
             textFields[i] = new JTextField("");
 
             deleteButtons[i] = new JButton(deleteIcon);
             formatButton(deleteButtons[i]);
             deleteButtons[i].setVisible(false);
-            deleteButtons[i].setPreferredSize(new Dimension(20, 20));
+            deleteButtons[i].setPreferredSize(new Dimension(iconSize, iconSize));
+            deleteButtons[i].setMargin(new Insets(0, 0, 0, 0));
             deleteButtons[i].setToolTipText("Wort aus Liste löschen.");
+            deleteButtons[i].setBorderPainted(false);
+            deleteButtons[i].setBorder(null);
+            deleteButtons[i].setContentAreaFilled(false);
+            deleteButtons[i].setFocusPainted(false);
+            deleteButtons[i].setOpaque(false);
         }
 
         ImageIcon settingsIcon = new ImageIcon(
                 Objects.requireNonNull(getClass().getResource("/icons/settings.png"))
         );
-        settingsIcon.setImage(settingsIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+        settingsIcon.setImage(settingsIcon.getImage().getScaledInstance(iconSize, iconSize, Image.SCALE_SMOOTH));
         settingsButton = new JButton(settingsIcon);
         formatButton(settingsButton);
         settingsButton.setToolTipText("Einstellungen.");
@@ -96,7 +106,7 @@ public class View {
         ImageIcon infoIcon = new ImageIcon(
                 Objects.requireNonNull(getClass().getResource("/icons/info.png"))
         );
-        infoIcon.setImage(infoIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+        infoIcon.setImage(infoIcon.getImage().getScaledInstance(iconSize, iconSize, Image.SCALE_SMOOTH));
         infoButton = new JButton(infoIcon);
         formatButton(infoButton);
         infoButton.setToolTipText("Informationen.");
@@ -105,7 +115,7 @@ public class View {
         ImageIcon resetIcon = new ImageIcon(
                 Objects.requireNonNull(getClass().getResource("/icons/reset.png"))
         );
-        resetIcon.setImage(resetIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+        resetIcon.setImage(resetIcon.getImage().getScaledInstance(iconSize, iconSize, Image.SCALE_SMOOTH));
         resetButton = new JButton(resetIcon);
         formatButton(resetButton);
         resetButton.setToolTipText("Text zurücksetzen.");
@@ -114,7 +124,7 @@ public class View {
         pauseIcon = new ImageIcon(
                 Objects.requireNonNull(getClass().getResource("/icons/pause.png"))
         );
-        pauseIcon.setImage(pauseIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+        pauseIcon.setImage(pauseIcon.getImage().getScaledInstance(iconSize, iconSize, Image.SCALE_SMOOTH));
         pauseButton = new JButton(pauseIcon);
         formatButton(pauseButton);
         pauseButton.setToolTipText("Programm pausieren.");
@@ -122,7 +132,7 @@ public class View {
         playIcon = new ImageIcon(
                 Objects.requireNonNull(getClass().getResource("/icons/play.png"))
         );
-        playIcon.setImage(playIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+        playIcon.setImage(playIcon.getImage().getScaledInstance(iconSize, iconSize, Image.SCALE_SMOOTH));
 
 
 
@@ -132,11 +142,11 @@ public class View {
 
         frame = new JFrame("Word Autocomplete");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(300, 130 + 30*this.numberOfRows);
+        frame.setSize(300, 130 + ROW_HEIGHT*this.numberOfRows);
         frame.setAlwaysOnTop(true);
 
         JPanel panel = new JPanel(new GridBagLayout());
-        ((GridBagLayout) panel.getLayout()).columnWidths = new int[] {30, 30, 0};
+        ((GridBagLayout) panel.getLayout()).columnWidths = new int[] {ROW_HEIGHT, ROW_HEIGHT, 0};
         GridBagConstraints gbc = new GridBagConstraints();
 
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -160,7 +170,7 @@ public class View {
             ImageIcon numberIcon = new ImageIcon(
                     Objects.requireNonNull(getClass().getResource("/numbers/number"+(i+1)+".png"))
             );
-            numberIcon.setImage(numberIcon.getImage().getScaledInstance(20, 20, Image.SCALE_SMOOTH));
+            numberIcon.setImage(numberIcon.getImage().getScaledInstance(iconSize, iconSize, Image.SCALE_SMOOTH));
             numberLabels[i] = new JLabel(numberIcon);
             panel.add(numberLabels[i], gbc);
 
@@ -251,7 +261,7 @@ public class View {
             numberOfRowsSpinner.setValue(this.numberOfRows);
         }
 
-        frame.setSize(frame.getWidth(), 130 + 30*this.numberOfRows);
+        frame.setSize(frame.getWidth(), 130 + ROW_HEIGHT*this.numberOfRows);
     }
 
     public void addNumberOfRowsListener(ChangeListener listener) {
