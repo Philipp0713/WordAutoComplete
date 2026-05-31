@@ -56,7 +56,7 @@ Tip: The vocabulary grows as you type; suggestions improve over time.
 
 ## Security and Privacy
 - Keystrokes are processed locally to provide suggestions.
-- `userWords.json` will save custom words for autocompletion. So be aware that also passwords and other sensitive data might be stored there. But it will only be stored locally and can be easily deleted.
+- `userWords.json` will save custom words for autocompletion. So be aware that also passwords and other sensitive data might be stored there. So make sure to use the pause button in such a situation. But it will only be stored locally and can be easily deleted.
 - Be mindful of running global key loggers; only use software you trust.
 - Review and adjust antivirus/exceptions if necessary.
 
