@@ -121,7 +121,7 @@ public class Controller {
     }
 
     public void updateTextFields() {
-        view.updateTextFields(logger.getPredictedWordsEdited());
+        view.updateTextFields(logger.getPredictedWordsEdited(), logger.getWordToAddWhenTyping0());
     }
 
     public void updateText() {

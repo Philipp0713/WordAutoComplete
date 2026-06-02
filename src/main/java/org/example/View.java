@@ -21,6 +21,10 @@ public class View {
      * Stores all the text fields where the autocompleted words will be displayed.
      */
     private final JTextField[] textFields;
+
+    private final JTextField phraseToAddBy0Field;
+
+    private final JLabel phrasePrefixLabel;
     /**
      * Stores all the deleteButtons used to delete the respective word from the database.
      */
@@ -69,7 +73,7 @@ public class View {
 
         textFields = new JTextField[MAX_NUMBER_OF_ROWS];
         deleteButtons = new JButton[MAX_NUMBER_OF_ROWS];
-        numberLabels = new JLabel[MAX_NUMBER_OF_ROWS];
+        numberLabels = new JLabel[MAX_NUMBER_OF_ROWS+1];
 
         int iconSize = ROW_HEIGHT - 10;
 
@@ -93,6 +97,10 @@ public class View {
             deleteButtons[i].setFocusPainted(false);
             deleteButtons[i].setOpaque(false);
         }
+
+
+        this.phraseToAddBy0Field = new JTextField();
+        this.phrasePrefixLabel = new JLabel("hinzufügen: ");
 
         ImageIcon settingsIcon = new ImageIcon(
                 Objects.requireNonNull(getClass().getResource("/icons/settings.png"))
@@ -142,7 +150,7 @@ public class View {
 
         frame = new JFrame("Word Autocomplete");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(300, 130 + ROW_HEIGHT*this.numberOfRows);
+        frame.setSize(300, 130 + ROW_HEIGHT*(this.numberOfRows+1));
         frame.setAlwaysOnTop(true);
 
         JPanel panel = new JPanel(new GridBagLayout());
@@ -184,8 +192,47 @@ public class View {
             panel.add(textFields[i], gbc);
         }
 
-        // next row (spanning both columns)
+        // next row
         gbc.gridy = MAX_NUMBER_OF_ROWS;
+
+        gbc.gridx = 1;
+        gbc.gridwidth = 1;
+        gbc.weightx = 0;
+
+        ImageIcon numberIcon = new ImageIcon(
+                Objects.requireNonNull(getClass().getResource("/numbers/number0.png"))
+        );
+        numberIcon.setImage(numberIcon.getImage().getScaledInstance(iconSize, iconSize, Image.SCALE_SMOOTH));
+        numberLabels[MAX_NUMBER_OF_ROWS] = new JLabel(numberIcon);
+        panel.add(numberLabels[MAX_NUMBER_OF_ROWS], gbc);
+
+        gbc.gridx = 2;
+        gbc.gridwidth = 1;
+        gbc.weightx = 1;
+
+        JPanel phraseRow = new JPanel(new GridBagLayout());
+        GridBagConstraints inner = new GridBagConstraints();
+        inner.insets = new Insets(0, 0, 0, 0);
+        inner.gridy = 0;
+
+        // Label on the left
+        inner.gridx = 0;
+        inner.weightx = 0;
+        inner.fill = GridBagConstraints.NONE;
+        phraseRow.add(phrasePrefixLabel, inner);
+
+        // TextField on the right
+        inner.gridx = 1;
+        inner.weightx = 1;
+        inner.fill = GridBagConstraints.HORIZONTAL;
+        phraseToAddBy0Field.setEditable(false);
+        phraseToAddBy0Field.setBackground(Color.LIGHT_GRAY);
+        phraseRow.add(phraseToAddBy0Field, inner);
+
+        panel.add(phraseRow, gbc);
+
+        // next row (spanning both columns)
+        gbc.gridy = MAX_NUMBER_OF_ROWS + 1;
         gbc.gridx = 0;
         gbc.gridwidth = numberOfColumns; // span across all columns
         gbc.weightx = 1;
@@ -204,7 +251,7 @@ public class View {
         buttonPanel.add(pauseButton);
 
         gbc.gridx = 0;
-        gbc.gridy = MAX_NUMBER_OF_ROWS + 1;
+        gbc.gridy = MAX_NUMBER_OF_ROWS + 2;
         gbc.gridwidth = numberOfColumns;
 
         panel.add(buttonPanel, gbc);
@@ -261,7 +308,7 @@ public class View {
             numberOfRowsSpinner.setValue(this.numberOfRows);
         }
 
-        frame.setSize(frame.getWidth(), 130 + ROW_HEIGHT*this.numberOfRows);
+        frame.setSize(frame.getWidth(), 130 + ROW_HEIGHT*(this.numberOfRows+1));
     }
 
     public void addNumberOfRowsListener(ChangeListener listener) {
@@ -361,7 +408,7 @@ public class View {
         button.setMargin(new Insets(0, 0, 0, 0));
     }
 
-    public void updateTextFields(String[] newContent) {
+    public void updateTextFields(String[] newContent, String contentFor0) {
         if (newContent == null) {
             return;
         }
@@ -379,6 +426,7 @@ public class View {
                 textFields[i].setText("");
             }
         }
+        phraseToAddBy0Field.setText(contentFor0 == null || contentFor0.isEmpty() ? "" : "\"" + contentFor0 + "\"");
     }
 
     public void updateText(String newText) {

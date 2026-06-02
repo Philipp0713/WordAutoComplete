@@ -112,6 +112,17 @@ public class GlobalKeyLogger implements NativeKeyListener {
         return false;
     }
 
+    /**
+     * Returns the word that will be added to userWords.json when the user presses the number 0.
+     * @return the word that will be added to userWords.json when the user presses the number 0
+     */
+    public String getWordToAddWhenTyping0() {
+        if (textAsWords == null || textAsWords.isEmpty()) {
+            return predictedWordsLogic.length == 0 ? this.getLastWord() : predictedWordsLogic[0];
+        }
+        return predictedWordsLogic.length == 0 ? this.getLastWord() : textAsWords.getLast() + " " + predictedWordsLogic[0];
+    }
+
     @Override
     public void nativeKeyPressed(NativeKeyEvent e) {
 //        System.out.println("Taste gedrückt: " + NativeKeyEvent.getKeyText(e.getKeyCode()));
@@ -131,19 +142,20 @@ public class GlobalKeyLogger implements NativeKeyListener {
         // number 0
         if (e.getKeyCode() == NativeKeyEvent.VC_0) {
             new Thread(() -> {
-                String predictedWord = textAsWords.getLast() + " " + predictedWordsLogic[0];
+                String predictedWord = getWordToAddWhenTyping0();
 
                 try {
                     this.writePredictedWord(0);
-                    textAsWords.removeLast();
-                    textAsWords.add(predictedWord);
                 } catch (AWTException ignored) {}
+                if (!textAsWords.isEmpty()) textAsWords.removeLast();
+                textAsWords.add(predictedWord);
                 updatePredictedWords();
                 displayPredictedWords();
 
                 if (addSpaceAfterAutocompletion || this.hasWhitespace(predictedWord)) {
                     tree.addPhraseToWords(predictedWord);
                 }
+
             }).start();
             return;
         }
@@ -159,6 +171,7 @@ public class GlobalKeyLogger implements NativeKeyListener {
                     String predictedWord = predictedWordsLogic[finalI-2];
 
                     try {
+                        updatePredictedWords();
                         this.writePredictedWord(finalI-2);
                         textAsWords.add(predictedWord);
                     } catch (AWTException ignored) {}
